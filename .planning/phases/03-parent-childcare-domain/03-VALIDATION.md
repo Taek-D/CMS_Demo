@@ -6,7 +6,7 @@ nyquist_compliant: true
 plan_count: 4
 wave_count: 3
 created: 2026-04-06
-updated: 2026-04-06
+updated: 2026-04-07
 ---
 
 # Phase 03 - Validation Strategy
@@ -30,7 +30,7 @@ updated: 2026-04-06
 ## Wave Sampling
 
 - **After every task commit:** Run `npm run lint`
-- **After Wave 1:** Run `npx vitest run --passWithNoTests && npx playwright test --list`
+- **After Wave 1:** Run `npx vitest run --passWithNoTests && npx playwright test --pass-with-no-tests --list`
 - **After Wave 2:** Run `npx vitest run src/app/(member)/children/actions.test.ts src/app/(member)/children/child-form.test.tsx src/app/(admin)/admin/members/page.test.tsx`
 - **Before `$gsd-verify-work`:** Full suite must be green via `npx vitest run src/app/(member)/children/actions.test.ts src/app/(member)/children/child-form.test.tsx src/app/(admin)/admin/members/page.test.tsx && npx playwright test tests/member-billing-smoke.spec.ts`
 - **Max feedback latency target:** 120 seconds
@@ -51,7 +51,7 @@ updated: 2026-04-06
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | Primary Files | Status |
 |---------|------|------|-------------|-----------|-------------------|---------------|--------|
-| `03-01-T1` | `03-01` | 1 | `P3-04` | infra | `npm install && npm run lint && npx vitest run --passWithNoTests && npx playwright test --list` | `package.json`, `package-lock.json`, `vitest.config.ts`, `playwright.config.ts`, `src/test/setup.ts` | pending |
+| `03-01-T1` | `03-01` | 1 | `P3-04` | infra | `npm install && npm run lint && npx vitest run --passWithNoTests && npx playwright test --pass-with-no-tests --list` | `package.json`, `package-lock.json`, `vitest.config.ts`, `playwright.config.ts`, `src/test/setup.ts` | pending |
 | `03-01-T2` | `03-01` | 1 | `P3-04` | schema + types | `npm run lint && rg -n "create table cms_childcare_centers|create table cms_childcare_classes|create table cms_children" supabase/migrations/006_parent_childcare_domain.sql && rg -n "Morning Star Childcare|River Kids Center|Sun Class|Moon Class|Star Class" supabase/migrations/006_parent_childcare_domain.sql && rg -n "export interface ChildcareCenter|export interface ChildcareClass|export interface Child" src/types/database.ts && rg -n "generate_member_no|cms_billing_batches|cms_billing_results" supabase/migrations/001_initial_schema.sql` | `supabase/migrations/006_parent_childcare_domain.sql`, `src/types/database.ts` | pending |
 | `03-02-T1` | `03-02` | 2 | `P3-01` | integration | `npm run lint && npx vitest run src/app/(member)/children/actions.test.ts` | `src/app/(member)/children/page.tsx`, `src/app/(member)/children/actions.ts`, `src/app/(member)/children/actions.test.ts` | pending |
 | `03-02-T2` | `03-02` | 2 | `P3-02` | component | `npm run lint && npx vitest run src/app/(member)/children/child-form.test.tsx` | `src/app/(member)/children/child-form.tsx`, `src/app/(member)/children/page.tsx`, `src/app/(member)/layout.tsx`, `src/app/(member)/dashboard/page.tsx`, `src/app/(member)/children/child-form.test.tsx` | pending |
