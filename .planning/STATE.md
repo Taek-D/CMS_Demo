@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-04-08T01:54:49+09:00"
-last_activity: 2026-04-08 -- Completed 03-04 phase smoke regression
+status: completed
+last_updated: "2026-04-07T17:11:32.068Z"
+last_activity: 2026-04-07
 progress:
   total_phases: 4
   completed_phases: 1
@@ -14,17 +14,17 @@ progress:
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-06)
+See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 **Core value:** Reproduce the member and admin CMS auto-debit journey closely enough that we can validate the full flow without guesswork.
 **Current focus:** Phase 04 -- overdue-statement-excel
 
 ## Current Position
 
-Phase: 04 (overdue-statement-excel) -- READY TO PLAN
-Plan: not started
+Phase: 04
+Plan: Not started
 Status: Phase 03 complete
-Last activity: 2026-04-08 -- Completed 03-04 phase smoke regression
+Last activity: 2026-04-07
 
 ## Accumulated Context
 
@@ -32,6 +32,7 @@ Last activity: 2026-04-08 -- Completed 03-04 phase smoke regression
 - `supabase/migrations/003_fix_rls_and_constraints.sql` is applied on the linked remote Supabase project.
 - `supabase/migrations/004_fix_member_no_generation.sql` was executed against the linked remote database and its behavior is now verified through user-scoped inserts.
 - `supabase/migrations/005_create_member_profile_on_auth_signup.sql` now creates `cms_members` rows from `auth.users`, removing signup dependence on an immediate client session.
+- `supabase/migrations/006_parent_childcare_domain.sql` is applied on the linked remote Supabase project, and `npx supabase migration list` now shows local and remote aligned through `006`.
 - `npm run lint` passes in the current workspace.
 
 ### Roadmap Evolution
@@ -61,7 +62,6 @@ Last activity: 2026-04-08 -- Completed 03-04 phase smoke regression
 - `npx playwright test tests/member-billing-smoke.spec.ts` now passes with deterministic user seeding and coverage for `/dashboard`, `/account`, `/consent`, `/payments`, `/children`, and `/admin/members`.
 - `npx vitest run "src/app/(admin)/admin/members/page.test.tsx"` still passes after normalizing live admin CRM relation payloads.
 - A broader Phase 3 Vitest sweep found an out-of-scope dirty-worktree mismatch in `src/app/(member)/children/child-form.test.tsx`; it is logged in `.planning/phases/03-parent-childcare-domain/deferred-items.md`.
-- Supabase CLI migration history checks are still blocked because `SUPABASE_DB_PASSWORD` is not configured locally and direct CLI history queries hit the pooler circuit-breaker path.
 
 ## Remaining Blocker
 
