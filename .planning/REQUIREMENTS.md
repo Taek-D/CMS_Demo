@@ -36,8 +36,8 @@
 
 ### Parent-Childcare Domain
 
-- [ ] **P3-01**: A signed-in parent can create, edit, and view child records.
-- [ ] **P3-02**: A child can be linked to a childcare center and class through a searchable selection flow.
+- [x] **P3-01**: A signed-in parent can create, edit, and view child records.
+- [x] **P3-02**: A child can be linked to a childcare center and class through a searchable selection flow.
 - [x] **P3-03**: Admin screens can view parent, child, childcare center, and class relationships together.
 - [x] **P3-04**: The childcare domain model stays additive and regression-safe alongside the existing member number and billing structures.
 
@@ -61,8 +61,8 @@
 | ADM-02 | Phase 2 | Complete |
 | VER-01 | Phase 2 | Complete |
 | VER-02 | Phase 2 | Complete |
-| P3-01 | Phase 3 | Planned |
-| P3-02 | Phase 3 | Planned |
+| P3-01 | Phase 3 | Complete |
+| P3-02 | Phase 3 | Complete |
 | P3-03 | Phase 3 | Complete |
 | P3-04 | Phase 3 | Complete |
 
@@ -71,6 +71,8 @@
 - `DB-02` is complete because user-scoped profile insert, user-scoped bank account delete, and duplicate monthly batch rejection were all re-verified on the linked remote data path.
 - `MEM-01` remains blocked by Supabase Auth email send throttling (`over_email_send_rate_limit`), not by the current application code path. Signup profile creation now lives in `005_create_member_profile_on_auth_signup.sql`.
 - `VER-02` is complete because the remaining risk and next action are now explicit: wait for Auth email cooldown, then re-run one real UI signup to close `MEM-01`.
+- `P3-01` is complete because `03-02` now ships member-owned child CRUD with `/children` page coverage for auth, ownership, edit, and delete behavior.
+- `P3-02` is complete because `03-02` now ships the searchable center-first flow with class options locked to the selected childcare center.
 - `P3-03` is complete because `03-03` now renders parent, child, childcare center, and class relationships together on `/admin/members` with targeted filter and rendering test coverage.
 - `P3-04` is complete because `03-01` added the Phase 3 test harness plus an additive childcare migration and synced database types without changing `generate_member_no` or the billing tables.
 
@@ -82,4 +84,4 @@
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-08 after completing Phase 03 Plan 03 admin CRM work*
+*Last updated: 2026-04-08 after completing Phase 03 Plan 02 member child-management work*

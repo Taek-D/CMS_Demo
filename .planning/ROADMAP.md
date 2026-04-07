@@ -56,7 +56,7 @@
 
 Plans:
 - [x] 03-01-PLAN.md — Establish the additive childcare schema contract and Phase 3 validation harness.
-- [ ] 03-02-PLAN.md — Build the member child-management page, CRUD actions, and two-step center/class selection flow.
+- [x] 03-02-PLAN.md — Build the member child-management page, CRUD actions, and two-step center/class selection flow.
 - [x] 03-03-PLAN.md — Enrich the admin members CRM with parent/child/center/class visibility and filters.
 - [ ] 03-04-PLAN.md — Add stable automation hooks and the end-to-end Phase 3 smoke regression.
 
@@ -74,9 +74,9 @@ Plans:
 
 ## Next Step
 
-`Execute or reconcile 03-02-PLAN.md, then continue with 03-04-PLAN.md`
+`Execute 03-04-PLAN.md to add the Phase 3 smoke regression and automation hooks`
 
-Phase 3 remains in progress. The admin CRM relationship surface from `03-03` is complete; the remaining Phase 3 work is the member child-management surface (`03-02`) and the end-to-end smoke regression (`03-04`).
+Phase 3 remains in progress. The parent child-management surface from `03-02` and the admin CRM relationship surface from `03-03` are complete; the remaining Phase 3 work is the end-to-end smoke regression (`03-04`).
 
 ---
-*Last updated: 2026-04-08 after completing Phase 03 Plan 03*
+*Last updated: 2026-04-08 after completing Phase 03 Plan 02*

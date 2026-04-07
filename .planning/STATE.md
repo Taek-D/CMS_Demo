@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-07T16:21:04.884Z"
-last_activity: 2026-04-08 -- Completed 03-03 admin members CRM relationship filters and projection
+last_updated: "2026-04-07T16:29:12.001Z"
+last_activity: 2026-04-08 -- Completed 03-02 member child-management surface
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 ## Project Reference
@@ -22,9 +22,9 @@ See: `.planning/PROJECT.md` (updated 2026-04-06)
 ## Current Position
 
 Phase: 03 (parent-childcare-domain) — EXECUTING
-Plan: 2 of 4
-Status: 03-03 completed out of order; 03-02 remains the next unresolved plan
-Last activity: 2026-04-08 -- Completed 03-03 admin members CRM relationship filters and projection
+Plan: 3 of 4
+Status: Ready to execute Plan 04
+Last activity: 2026-04-08 -- Completed 03-02 member child-management surface
 
 ## Accumulated Context
 
@@ -41,6 +41,8 @@ Last activity: 2026-04-08 -- Completed 03-03 admin members CRM relationship filt
 
 ## Latest Verification Notes
 
+- `npm run lint` passes after the `/children` member child-management surface was added.
+- `npx vitest run "src/app/(member)/children/actions.test.ts" "src/app/(member)/children/child-form.test.tsx"` passes with auth, revalidation, search, scoped-class, edit, and discoverability coverage.
 - `npm run lint` passes after the `03-03` admin CRM relationship changes.
 - `npx vitest run "src/app/(admin)/admin/members/page.test.tsx"` passes with nested query and rendering coverage for parent, child, center, and class filters.
 - `npm run lint` passes after adding the Phase 3 Vitest and Playwright harness.
@@ -64,7 +66,7 @@ Last activity: 2026-04-08 -- Completed 03-03 admin members CRM relationship filt
 
 ## Next Action
 
-- Execute or reconcile `03-02-PLAN.md`, then continue with `03-04-PLAN.md` once both Phase 3 surfaces are committed.
+- Execute `03-04-PLAN.md` to add the Phase 3 smoke regression and automation hooks now that both childcare surfaces are committed.
 
 ## Decisions
 
@@ -74,15 +76,19 @@ Last activity: 2026-04-08 -- Completed 03-03 admin members CRM relationship filt
 - 2026-04-08 -- Locked the admin members page to parent, child, center, and class filters while keeping legacy search as a parent-filter fallback.
 - 2026-04-08 -- Used conditional `!inner` joins in the admin members query so relation filters narrow the parent result set instead of overfetching unrelated rows.
 - 2026-04-08 -- Covered the async admin server page with direct Vitest rendering plus isolated query-helper tests to keep CRM regressions local to the route.
+- [Phase 03-parent-childcare-domain]: Kept /children server-first and handed loaded child/center/class data to a single client leaf for interaction.
+- [Phase 03-parent-childcare-domain]: Used search input plus existing buttons for center selection and the existing Select primitive for scoped class choice, avoiding a new combobox dependency.
+- [Phase 03-parent-childcare-domain]: Added /children discoverability through both member navigation and a dashboard child summary card.
 
 ## Performance Metrics
 
 | Phase | Plan | Duration | Tasks | Files | Completed |
 |-------|------|----------|-------|-------|-----------|
 | 03-parent-childcare-domain | 01 | 25 min | 2 | 7 | 2026-04-07 |
+| 03-parent-childcare-domain | 02 | 13 min | 2 | 7 | 2026-04-08 |
 | 03-parent-childcare-domain | 03 | 8 min | 2 | 2 | 2026-04-08 |
 
 ## Session Info
 
-- Last session: 2026-04-07T16:21:04.884Z
-- Stopped At: Completed 03-03-PLAN.md
+- Last session: 2026-04-07T16:29:12.001Z
+- Stopped At: Completed 03-02-PLAN.md
