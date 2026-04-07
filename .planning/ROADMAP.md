@@ -55,7 +55,7 @@
 **Plans:** 4 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Establish the additive childcare schema contract and Phase 3 validation harness.
+- [x] 03-01-PLAN.md — Establish the additive childcare schema contract and Phase 3 validation harness.
 - [ ] 03-02-PLAN.md — Build the member child-management page, CRUD actions, and two-step center/class selection flow.
 - [ ] 03-03-PLAN.md — Enrich the admin members CRM with parent/child/center/class visibility and filters.
 - [ ] 03-04-PLAN.md — Add stable automation hooks and the end-to-end Phase 3 smoke regression.
@@ -79,4 +79,4 @@ Plans:
 Phase 3 and Phase 4 context are now ready. Plan Phase 3 first, then continue to Phase 4 after the domain foundation is in place.
 
 ---
-*Last updated: 2026-04-06 after adding portfolio extension phases 3 and 4*
+*Last updated: 2026-04-07 after completing Phase 03 Plan 01*

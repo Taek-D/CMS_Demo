@@ -1,19 +1,82 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+last_updated: "2026-04-07T16:08:29.364Z"
+last_activity: 2026-04-07 -- Completed 03-01 validation harness and childcare schema contract
+progress:
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 4
+  completed_plans: 1
+---
+
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-04-06)
 
-**Core value:** 회원과 관리자 모두가 자동이체 핵심 흐름을 실제에 가깝게, 끊김 없이 재현하고 검증할 수 있어야 한다.
-**Current focus:** Phase 1 - Apply migration and validate member flows
+**Core value:** Reproduce the member and admin CMS auto-debit journey closely enough that we can validate the full flow without guesswork.
+**Current focus:** Phase 03 — parent-childcare-domain
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: -
-Status: Defining requirements
-Last activity: 2026-04-06 - Milestone v1.0 started
+Phase: 03 (parent-childcare-domain) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute Plan 02
+Last activity: 2026-04-07 -- Completed 03-01 validation harness and childcare schema contract
 
 ## Accumulated Context
 
-- `.planning/codebase/`에 현재 코드베이스 분석 문서가 있다.
-- `supabase/migrations/003_fix_rls_and_constraints.sql`가 추가되었지만 아직 원격 Supabase 반영 여부는 확인 전이다.
-- `npm run lint`는 현재 통과하는 상태다.
+- `.planning/codebase/` contains the current codebase mapping documents.
+- `supabase/migrations/003_fix_rls_and_constraints.sql` is applied on the linked remote Supabase project.
+- `supabase/migrations/004_fix_member_no_generation.sql` was executed against the linked remote database and its behavior is now verified through user-scoped inserts.
+- `supabase/migrations/005_create_member_profile_on_auth_signup.sql` now creates `cms_members` rows from `auth.users`, removing signup dependence on an immediate client session.
+- `npm run lint` passes in the current workspace.
+
+### Roadmap Evolution
+
+- Phase 3 added: Parent child registration plus childcare center/class linking for stronger domain realism.
+- Phase 4 added: Overdue-member management and childcare/class monthly Excel statement export for stronger CRM realism.
+
+## Latest Verification Notes
+
+- `npm run lint` passes after adding the Phase 3 Vitest and Playwright harness.
+- `npx vitest run --passWithNoTests` succeeds with the new `vitest.config.ts`.
+- `npx playwright test --pass-with-no-tests --list` succeeds with the new `playwright.config.ts`.
+- `supabase/migrations/006_parent_childcare_domain.sql` adds childcare centers, classes, and children without altering `generate_member_no`, `cms_billing_batches`, or `cms_billing_results`.
+- A real `signUp` retry still fails with Supabase Auth error `over_email_send_rate_limit`.
+- A service-role `auth.admin.createUser()` verification now confirms that auth user creation automatically produces a `cms_members` row with `member_no`.
+- Two separate user-scoped `cms_members` inserts generated sequential `member_no` values: `MEM-202604-00004` and `MEM-202604-00005`.
+- User-scoped delete on `cms_bank_accounts` succeeds and removes the row.
+- Direct duplicate inserts into `cms_billing_batches` fail with Postgres error code `23505`, confirming the monthly batch unique constraint is active.
+- Admin batch regression still passes:
+  - unauthenticated `POST /api/billing/run` returns `401`
+  - authenticated admin request returns `200`
+  - admin results page returns `200`
+- Supabase CLI migration history checks are still blocked because `SUPABASE_DB_PASSWORD` is not configured locally and direct CLI history queries hit the pooler circuit-breaker path.
+
+## Remaining Blocker
+
+- `MEM-01` is still open only because the public `signUp` path is currently rate-limited by Supabase Auth.
+
+## Next Action
+
+- Execute `03-02-PLAN.md` to build the member child-management page and two-step childcare center/class selection flow on top of the committed schema and test harness.
+
+## Decisions
+
+- 2026-04-07 -- Established Vitest and Playwright runners in Wave 1 so all later Phase 3 plans can add tests without more infrastructure work.
+- 2026-04-07 -- Modeled childcare data additively with `cms_children` linked to `cms_members` and `cms_childcare_classes`, leaving `member_no` and billing tables untouched.
+- 2026-04-07 -- Protected `cms_children` with parent-owned RLS while exposing read-only authenticated policies for childcare centers and classes.
+
+## Performance Metrics
+
+| Phase | Plan | Duration | Tasks | Files | Completed |
+|-------|------|----------|-------|-------|-----------|
+| 03-parent-childcare-domain | 01 | 25 min | 2 | 7 | 2026-04-07 |
+
+## Session Info
+
+- Last session: 2026-04-07T16:07:08.7197394Z
+- Stopped At: Completed 03-parent-childcare-domain-01-PLAN.md

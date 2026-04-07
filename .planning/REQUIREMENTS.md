@@ -1,63 +1,84 @@
 # Requirements: CMS Auto-Debit Demo
 
 **Defined:** 2026-04-06
-**Core Value:** 회원과 관리자 모두가 자동이체 핵심 흐름을 실제에 가깝게, 끊김 없이 재현하고 검증할 수 있어야 한다.
+**Core Value:** Members and admins should both be able to exercise the CMS auto-debit flow closely enough to validate real behavior, not just happy-path mocks.
 
 ## v1 Requirements
 
 ### Database Integrity
 
-- [ ] **DB-01**: Supabase 원격 데이터베이스에 `003_fix_rls_and_constraints.sql`가 오류 없이 적용된다.
-- [ ] **DB-02**: 회원 프로필 insert, 계좌 delete, 월별 배치 unique 제약이 실제 DB에서 유효하게 동작한다.
+- [ ] **DB-01**: Apply `003_fix_rls_and_constraints.sql` to the linked remote Supabase database without errors.
+- [ ] **DB-02**: Confirm that member profile insert, bank account delete, and monthly billing batch uniqueness all work at the database layer.
 
 ### Member Flows
 
-- [ ] **MEM-01**: 신규 회원이 UI에서 회원가입을 완료하면 `cms_members` 프로필이 함께 생성된다.
-- [ ] **MEM-02**: 회원이 등록된 계좌를 UI에서 삭제할 수 있다.
+- [ ] **MEM-01**: A new member can complete signup from the UI path and create a matching `cms_members` profile row.
+- [ ] **MEM-02**: A signed-in member can delete their registered bank account from the app flow.
 
 ### Admin Flows
 
-- [ ] **ADM-01**: 관리자만 배치 실행 API와 관리자 화면 데이터에 접근할 수 있다.
-- [ ] **ADM-02**: 관리자가 UI에서 월별 배치를 실행하면 출금 결과가 생성되고 화면에서 확인된다.
+- [ ] **ADM-01**: Only an admin can access the billing run API and admin pages.
+- [ ] **ADM-02**: An admin can execute a billing batch and confirm the generated results in the admin UI.
 
 ### Verification
 
-- [ ] **VER-01**: 회원가입, 계좌 삭제, 관리자 배치 실행의 실제 검증 결과가 문서화된다.
-- [ ] **VER-02**: 검증 과정에서 남은 리스크와 후속 작업이 명확하게 정리된다.
+- [ ] **VER-01**: Signup, account delete, and admin billing execution evidence is documented.
+- [ ] **VER-02**: Remaining risks and the next follow-up action are documented clearly.
 
 ## v2 Requirements
 
 ### Product Expansion
 
-- **EXP-01**: 이메일 인증 및 비밀번호 재설정 흐름을 추가한다.
-- **EXP-02**: CMS 웹훅/배치 결과를 더 실제 시스템에 가깝게 시뮬레이션한다.
+- **EXP-01**: Add richer email/password recovery and account management flows.
+- **EXP-02**: Make webhook and billing execution behavior closer to a production-like CMS integration.
+
+## Phase 3 Derived Requirements
+
+### Parent-Childcare Domain
+
+- [ ] **P3-01**: A signed-in parent can create, edit, and view child records.
+- [ ] **P3-02**: A child can be linked to a childcare center and class through a searchable selection flow.
+- [ ] **P3-03**: Admin screens can view parent, child, childcare center, and class relationships together.
+- [x] **P3-04**: The childcare domain model stays additive and regression-safe alongside the existing member number and billing structures.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| UI 리디자인 | 현재 milestone의 목적은 운영 안정화와 흐름 검증이다. |
-| 신규 결제/청구 기능 추가 | 기존 자동이체 핵심 플로우 검증이 우선이다. |
-| 모바일 앱/반응형 고도화 | 이번 범위는 웹 데모의 실제 동작 검증에 한정한다. |
+| Full UI redesign | This milestone is focused on flow correctness and verification. |
+| New payment or invoicing features | Existing auto-debit flow validation is the current priority. |
+| Deep mobile responsiveness work | This milestone is scoped to end-to-end flow verification. |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DB-01 | Phase 1 | Pending |
-| DB-02 | Phase 1 | Pending |
-| MEM-01 | Phase 1 | Pending |
-| MEM-02 | Phase 1 | Pending |
-| ADM-01 | Phase 2 | Pending |
-| ADM-02 | Phase 2 | Pending |
-| VER-01 | Phase 2 | Pending |
-| VER-02 | Phase 2 | Pending |
+| DB-01 | Phase 1 | Complete |
+| DB-02 | Phase 1 | Complete |
+| MEM-01 | Phase 1 | Blocked |
+| MEM-02 | Phase 1 | Complete |
+| ADM-01 | Phase 2 | Complete |
+| ADM-02 | Phase 2 | Complete |
+| VER-01 | Phase 2 | Complete |
+| VER-02 | Phase 2 | Complete |
+| P3-01 | Phase 3 | Planned |
+| P3-02 | Phase 3 | Planned |
+| P3-03 | Phase 3 | Planned |
+| P3-04 | Phase 3 | Complete |
+
+## Latest Verification Notes
+
+- `DB-02` is complete because user-scoped profile insert, user-scoped bank account delete, and duplicate monthly batch rejection were all re-verified on the linked remote data path.
+- `MEM-01` remains blocked by Supabase Auth email send throttling (`over_email_send_rate_limit`), not by the current application code path. Signup profile creation now lives in `005_create_member_profile_on_auth_signup.sql`.
+- `VER-02` is complete because the remaining risk and next action are now explicit: wait for Auth email cooldown, then re-run one real UI signup to close `MEM-01`.
+- `P3-04` is complete because `03-01` added the Phase 3 test harness plus an additive childcare migration and synced database types without changing `generate_member_no` or the billing tables.
 
 **Coverage:**
 - v1 requirements: 8 total
-- Mapped to phases: 8
+- Phase 3 derived requirements: 4 total
+- Mapped to phases: 12
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-06 after initial milestone definition*
+*Last updated: 2026-04-07 after completing Phase 03 Plan 01 foundation work*
