@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-07T16:08:29.364Z"
-last_activity: 2026-04-07 -- Completed 03-01 validation harness and childcare schema contract
+last_updated: "2026-04-07T16:21:04.884Z"
+last_activity: 2026-04-08 -- Completed 03-03 admin members CRM relationship filters and projection
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 ## Project Reference
@@ -23,8 +23,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-06)
 
 Phase: 03 (parent-childcare-domain) — EXECUTING
 Plan: 2 of 4
-Status: Ready to execute Plan 02
-Last activity: 2026-04-07 -- Completed 03-01 validation harness and childcare schema contract
+Status: 03-03 completed out of order; 03-02 remains the next unresolved plan
+Last activity: 2026-04-08 -- Completed 03-03 admin members CRM relationship filters and projection
 
 ## Accumulated Context
 
@@ -41,6 +41,8 @@ Last activity: 2026-04-07 -- Completed 03-01 validation harness and childcare sc
 
 ## Latest Verification Notes
 
+- `npm run lint` passes after the `03-03` admin CRM relationship changes.
+- `npx vitest run "src/app/(admin)/admin/members/page.test.tsx"` passes with nested query and rendering coverage for parent, child, center, and class filters.
 - `npm run lint` passes after adding the Phase 3 Vitest and Playwright harness.
 - `npx vitest run --passWithNoTests` succeeds with the new `vitest.config.ts`.
 - `npx playwright test --pass-with-no-tests --list` succeeds with the new `playwright.config.ts`.
@@ -62,21 +64,25 @@ Last activity: 2026-04-07 -- Completed 03-01 validation harness and childcare sc
 
 ## Next Action
 
-- Execute `03-02-PLAN.md` to build the member child-management page and two-step childcare center/class selection flow on top of the committed schema and test harness.
+- Execute or reconcile `03-02-PLAN.md`, then continue with `03-04-PLAN.md` once both Phase 3 surfaces are committed.
 
 ## Decisions
 
 - 2026-04-07 -- Established Vitest and Playwright runners in Wave 1 so all later Phase 3 plans can add tests without more infrastructure work.
 - 2026-04-07 -- Modeled childcare data additively with `cms_children` linked to `cms_members` and `cms_childcare_classes`, leaving `member_no` and billing tables untouched.
 - 2026-04-07 -- Protected `cms_children` with parent-owned RLS while exposing read-only authenticated policies for childcare centers and classes.
+- 2026-04-08 -- Locked the admin members page to parent, child, center, and class filters while keeping legacy search as a parent-filter fallback.
+- 2026-04-08 -- Used conditional `!inner` joins in the admin members query so relation filters narrow the parent result set instead of overfetching unrelated rows.
+- 2026-04-08 -- Covered the async admin server page with direct Vitest rendering plus isolated query-helper tests to keep CRM regressions local to the route.
 
 ## Performance Metrics
 
 | Phase | Plan | Duration | Tasks | Files | Completed |
 |-------|------|----------|-------|-------|-----------|
 | 03-parent-childcare-domain | 01 | 25 min | 2 | 7 | 2026-04-07 |
+| 03-parent-childcare-domain | 03 | 8 min | 2 | 2 | 2026-04-08 |
 
 ## Session Info
 
-- Last session: 2026-04-07T16:07:08.7197394Z
-- Stopped At: Completed 03-parent-childcare-domain-01-PLAN.md
+- Last session: 2026-04-07T16:21:04.884Z
+- Stopped At: Completed 03-03-PLAN.md

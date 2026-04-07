@@ -57,7 +57,7 @@
 Plans:
 - [x] 03-01-PLAN.md — Establish the additive childcare schema contract and Phase 3 validation harness.
 - [ ] 03-02-PLAN.md — Build the member child-management page, CRUD actions, and two-step center/class selection flow.
-- [ ] 03-03-PLAN.md — Enrich the admin members CRM with parent/child/center/class visibility and filters.
+- [x] 03-03-PLAN.md — Enrich the admin members CRM with parent/child/center/class visibility and filters.
 - [ ] 03-04-PLAN.md — Add stable automation hooks and the end-to-end Phase 3 smoke regression.
 
 ### Phase 4: Add overdue management and statement export
@@ -74,9 +74,9 @@ Plans:
 
 ## Next Step
 
-`$gsd-plan-phase 3`
+`Execute or reconcile 03-02-PLAN.md, then continue with 03-04-PLAN.md`
 
-Phase 3 and Phase 4 context are now ready. Plan Phase 3 first, then continue to Phase 4 after the domain foundation is in place.
+Phase 3 remains in progress. The admin CRM relationship surface from `03-03` is complete; the remaining Phase 3 work is the member child-management surface (`03-02`) and the end-to-end smoke regression (`03-04`).
 
 ---
-*Last updated: 2026-04-07 after completing Phase 03 Plan 01*
+*Last updated: 2026-04-08 after completing Phase 03 Plan 03*
