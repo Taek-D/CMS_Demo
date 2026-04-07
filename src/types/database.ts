@@ -50,6 +50,43 @@ export interface BillingResult {
   created_at: string;
 }
 
+export interface ChildcareCenter {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface ChildcareClass {
+  id: string;
+  center_id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface Child {
+  id: string;
+  parent_member_id: string;
+  class_id: string;
+  name: string;
+  birth_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type ConsentStatus = 'pending' | 'consented' | 'revoked';
 export type BillingStatus = 'pending' | 'success' | 'failed';
 export type BatchStatus = 'pending' | 'processing' | 'completed';
+export type ChildcareCenterSummary = Pick<ChildcareCenter, 'id' | 'name'>;
+export type ChildcareClassSummary = Pick<ChildcareClass, 'id' | 'center_id' | 'name'>;
+
+export type ChildcareClassWithCenter = ChildcareClass & {
+  cms_childcare_centers: ChildcareCenter;
+};
+
+export type ChildWithClass = Child & {
+  cms_childcare_classes: ChildcareClassWithCenter;
+};
+
+export type MemberWithChildren = Member & {
+  cms_children: ChildWithClass[];
+};
