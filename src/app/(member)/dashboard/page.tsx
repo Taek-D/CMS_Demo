@@ -1,153 +1,188 @@
-import { createClient } from '@/lib/supabase/server';
-import { requireAuth } from '@/lib/auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+
+import { requireAuth } from '@/lib/auth';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/server';
+
+export function buildDashboardChildrenSummary(count: number) {
+  return {
+    title: 'Children',
+    description: 'Manage children linked to your member account.',
+    href: '/children',
+    count,
+  };
+}
+
+function getStatusBadge(status: string) {
+  switch (status) {
+    case 'consented':
+      return <Badge className="bg-green-500">Consented</Badge>;
+    case 'pending':
+      return <Badge className="bg-yellow-500 text-black">Pending</Badge>;
+    case 'revoked':
+      return <Badge variant="outline">Revoked</Badge>;
+    default:
+      return <Badge variant="outline">Unknown</Badge>;
+  }
+}
+
+function getPaymentStatusBadge(status: string) {
+  switch (status) {
+    case 'success':
+      return <Badge className="bg-green-500">Success</Badge>;
+    case 'failed':
+      return <Badge variant="destructive">Failed</Badge>;
+    case 'pending':
+      return <Badge className="bg-blue-500">Pending</Badge>;
+    default:
+      return <Badge variant="outline">Unknown</Badge>;
+  }
+}
 
 export default async function DashboardPage() {
   const user = await requireAuth();
   const supabase = await createClient();
 
-  // 회원 정보 조회
-  const { data: member } = await supabase
-    .from('cms_members')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+  const [memberResult, accountsResult, recentPaymentsResult, childrenResult] =
+    await Promise.all([
+      supabase.from('cms_members').select('*').eq('id', user.id).single(),
+      supabase.from('cms_bank_accounts').select('*').eq('member_id', user.id),
+      supabase
+        .from('cms_billing_results')
+        .select('*')
+        .eq('member_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5),
+      supabase.from('cms_children').select('id').eq('parent_member_id', user.id),
+    ]);
 
-  // 계좌 정보 조회
-  const { data: accounts } = await supabase
-    .from('cms_bank_accounts')
-    .select('*')
-    .eq('member_id', user.id);
-
-  // 최근 결제 내역 조회
-  const { data: recentPayments } = await supabase
-    .from('cms_billing_results')
-    .select('*')
-    .eq('member_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(5);
-
-  const account = accounts?.[0];
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'consented':
-        return <Badge className="bg-green-500">동의완료</Badge>;
-      case 'pending':
-        return <Badge variant="secondary" className="bg-yellow-500">미동의</Badge>;
-      case 'revoked':
-        return <Badge variant="outline" className="bg-gray-500">해지</Badge>;
-      default:
-        return <Badge variant="outline">알 수 없음</Badge>;
-    }
-  };
-
-  const getPaymentStatusBadge = (status: string) => {
-    switch (status) {
-      case 'success':
-        return <Badge className="bg-green-500">성공</Badge>;
-      case 'failed':
-        return <Badge variant="destructive">실패</Badge>;
-      case 'pending':
-        return <Badge className="bg-blue-500">처리중</Badge>;
-      default:
-        return <Badge variant="outline">알 수 없음</Badge>;
-    }
-  };
+  const member = memberResult.data;
+  const accounts = accountsResult.data ?? [];
+  const recentPayments = recentPaymentsResult.data ?? [];
+  const childrenSummary = buildDashboardChildrenSummary(
+    childrenResult.data?.length ?? 0
+  );
+  const account = accounts[0];
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          {member?.name} 회원님, 환영합니다
+          {member?.name ?? 'Member'} Dashboard
         </h1>
-        <p className="text-gray-600 mt-1">회원번호: {member?.member_no}</p>
+        <p className="mt-1 text-gray-600">Member No: {member?.member_no ?? '-'}</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* 계좌 상태 */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
-            <CardTitle>계좌 상태</CardTitle>
-            <CardDescription>등록된 계좌 정보</CardDescription>
+            <CardTitle>Account Status</CardTitle>
+            <CardDescription>Current billing account and consent status.</CardDescription>
           </CardHeader>
           <CardContent>
             {account ? (
               <div className="space-y-3">
                 <div>
-                  <p className="text-sm text-gray-600">은행</p>
+                  <p className="text-sm text-gray-600">Bank</p>
                   <p className="font-medium">{account.bank_code}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">예금주</p>
+                  <p className="text-sm text-gray-600">Account Holder</p>
                   <p className="font-medium">{account.account_holder}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">출금 동의 상태</p>
+                  <p className="text-sm text-gray-600">Consent</p>
                   <div className="mt-1">{getStatusBadge(account.consent_status)}</div>
                 </div>
                 <Link href="/account">
-                  <Button variant="outline" className="w-full mt-2">
-                    계좌 관리
+                  <Button variant="outline" className="mt-2 w-full">
+                    Manage account
                   </Button>
                 </Link>
               </div>
             ) : (
-              <div className="text-center py-4">
-                <p className="text-gray-500 mb-3">아직 등록된 계좌가 없습니다</p>
+              <div className="space-y-3 text-center">
+                <p className="text-sm text-gray-500">No account has been registered yet.</p>
                 <Link href="/account">
-                  <Button>계좌 등록하기</Button>
+                  <Button className="w-full">Register account</Button>
                 </Link>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* 빠른 액션 */}
         <Card>
           <CardHeader>
-            <CardTitle>빠른 액션</CardTitle>
-            <CardDescription>자주 사용하는 기능</CardDescription>
+            <CardTitle>{childrenSummary.title}</CardTitle>
+            <CardDescription>{childrenSummary.description}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border border-dashed border-gray-300 p-4">
+              <p className="text-sm text-gray-600">Registered children</p>
+              <p className="mt-1 text-3xl font-semibold text-gray-900">
+                {childrenSummary.count}
+              </p>
+            </div>
+            <Link
+              href="/children"
+              className="inline-flex w-full items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
+            >
+              Manage children
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Open common member tasks.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Link href="/account">
               <Button variant="outline" className="w-full">
-                계좌 등록/조회
+                Manage account
               </Button>
             </Link>
             <Link href="/consent">
               <Button variant="outline" className="w-full">
-                출금 동의 관리
+                Manage consent
               </Button>
             </Link>
             <Link href="/payments">
               <Button variant="outline" className="w-full">
-                결제 내역 조회
+                View payments
               </Button>
             </Link>
           </CardContent>
         </Card>
 
-        {/* 최근 결제 내역 */}
         <Card className="md:col-span-2 lg:col-span-1">
           <CardHeader>
-            <CardTitle>최근 결제 내역</CardTitle>
-            <CardDescription>최근 5건의 결제 내역</CardDescription>
+            <CardTitle>Recent Payments</CardTitle>
+            <CardDescription>Latest five billing results.</CardDescription>
           </CardHeader>
           <CardContent>
-            {recentPayments && recentPayments.length > 0 ? (
+            {recentPayments.length > 0 ? (
               <div className="space-y-3">
                 {recentPayments.map((payment) => (
-                  <div key={payment.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={payment.id}
+                    className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                  >
                     <div>
                       <p className="font-medium">
                         {new Date(payment.created_at).toLocaleDateString('ko-KR')}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {payment.amount.toLocaleString()}원
+                        {payment.amount.toLocaleString()} KRW
                       </p>
                     </div>
                     {getPaymentStatusBadge(payment.status)}
@@ -155,12 +190,12 @@ export default async function DashboardPage() {
                 ))}
                 <Link href="/payments">
                   <Button variant="link" className="w-full">
-                    전체 내역 보기 →
+                    View all payments
                   </Button>
                 </Link>
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">아직 결제 내역이 없습니다</p>
+              <p className="py-4 text-center text-gray-500">No payment history yet.</p>
             )}
           </CardContent>
         </Card>
