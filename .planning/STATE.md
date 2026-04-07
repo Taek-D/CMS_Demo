@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-07T16:29:12.001Z"
-last_activity: 2026-04-08 -- Completed 03-02 member child-management surface
+last_updated: "2026-04-08T01:54:49+09:00"
+last_activity: 2026-04-08 -- Completed 03-04 phase smoke regression
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 ## Project Reference
@@ -17,14 +17,14 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-04-06)
 
 **Core value:** Reproduce the member and admin CMS auto-debit journey closely enough that we can validate the full flow without guesswork.
-**Current focus:** Phase 03 — parent-childcare-domain
+**Current focus:** Phase 04 -- overdue-statement-excel
 
 ## Current Position
 
-Phase: 03 (parent-childcare-domain) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute Plan 04
-Last activity: 2026-04-08 -- Completed 03-02 member child-management surface
+Phase: 04 (overdue-statement-excel) -- READY TO PLAN
+Plan: not started
+Status: Phase 03 complete
+Last activity: 2026-04-08 -- Completed 03-04 phase smoke regression
 
 ## Accumulated Context
 
@@ -58,6 +58,9 @@ Last activity: 2026-04-08 -- Completed 03-02 member child-management surface
   - unauthenticated `POST /api/billing/run` returns `401`
   - authenticated admin request returns `200`
   - admin results page returns `200`
+- `npx playwright test tests/member-billing-smoke.spec.ts` now passes with deterministic user seeding and coverage for `/dashboard`, `/account`, `/consent`, `/payments`, `/children`, and `/admin/members`.
+- `npx vitest run "src/app/(admin)/admin/members/page.test.tsx"` still passes after normalizing live admin CRM relation payloads.
+- A broader Phase 3 Vitest sweep found an out-of-scope dirty-worktree mismatch in `src/app/(member)/children/child-form.test.tsx`; it is logged in `.planning/phases/03-parent-childcare-domain/deferred-items.md`.
 - Supabase CLI migration history checks are still blocked because `SUPABASE_DB_PASSWORD` is not configured locally and direct CLI history queries hit the pooler circuit-breaker path.
 
 ## Remaining Blocker
@@ -66,7 +69,7 @@ Last activity: 2026-04-08 -- Completed 03-02 member child-management surface
 
 ## Next Action
 
-- Execute `03-04-PLAN.md` to add the Phase 3 smoke regression and automation hooks now that both childcare surfaces are committed.
+- Plan Phase 04 overdue management and statement export work on top of the now-verified parent/childcare domain.
 
 ## Decisions
 
@@ -79,6 +82,9 @@ Last activity: 2026-04-08 -- Completed 03-02 member child-management surface
 - [Phase 03-parent-childcare-domain]: Kept /children server-first and handed loaded child/center/class data to a single client leaf for interaction.
 - [Phase 03-parent-childcare-domain]: Used search input plus existing buttons for center selection and the existing Select primitive for scoped class choice, avoiding a new combobox dependency.
 - [Phase 03-parent-childcare-domain]: Added /children discoverability through both member navigation and a dashboard child summary card.
+- [Phase 03-parent-childcare-domain]: Seeded deterministic Playwright smoke users inside the spec with the Supabase service-role client so the regression remains self-contained.
+- [Phase 03-parent-childcare-domain]: Kept the smoke on the real member and admin routes so Phase 3 verifies coexistence with the existing billing journey instead of mock navigation.
+- [Phase 03-parent-childcare-domain]: Normalized admin CRM relation payloads at render time because live Supabase joins can return either a single object or an array.
 
 ## Performance Metrics
 
@@ -87,8 +93,9 @@ Last activity: 2026-04-08 -- Completed 03-02 member child-management surface
 | 03-parent-childcare-domain | 01 | 25 min | 2 | 7 | 2026-04-07 |
 | 03-parent-childcare-domain | 02 | 13 min | 2 | 7 | 2026-04-08 |
 | 03-parent-childcare-domain | 03 | 8 min | 2 | 2 | 2026-04-08 |
+| 03-parent-childcare-domain | 04 | 19 min | 2 | 6 | 2026-04-08 |
 
 ## Session Info
 
-- Last session: 2026-04-07T16:29:12.001Z
-- Stopped At: Completed 03-02-PLAN.md
+- Last session: 2026-04-08T01:54:49+09:00
+- Stopped At: Completed 03-04-PLAN.md
