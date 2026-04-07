@@ -193,7 +193,7 @@ export default function ChildForm({
               child from the same surface.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6" data-testid="child-form">
             {error ? (
               <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
@@ -237,6 +237,7 @@ export default function ChildForm({
               <Label htmlFor="center-search">Search Center</Label>
               <Input
                 id="center-search"
+                data-testid="center-search"
                 value={formState.centerSearch}
                 onChange={(event) =>
                   setFormState((current) => ({
@@ -246,7 +247,7 @@ export default function ChildForm({
                 }
                 placeholder="Type a center name"
               />
-              <div className="grid gap-2 sm:grid-cols-2">
+              <div className="grid gap-2 sm:grid-cols-2" data-testid="center-select">
                 {filteredCenters.map((center) => (
                   <Button
                     key={center.id}
@@ -256,6 +257,7 @@ export default function ChildForm({
                     }
                     className="justify-start"
                     aria-pressed={center.id === formState.selectedCenterId}
+                    data-testid={`center-select-${center.id}`}
                     onClick={() => handleCenterSelect(center.id)}
                   >
                     {center.name}
@@ -281,7 +283,7 @@ export default function ChildForm({
               >
                 <SelectTrigger
                   id="class-select-trigger"
-                  data-testid="class-select-trigger"
+                  data-testid="class-select"
                   className="w-full"
                   disabled={!formState.selectedCenterId}
                 >
@@ -333,12 +335,13 @@ export default function ChildForm({
               Edit or remove existing children without leaving this page.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4" data-testid="child-list">
             {childRecords.length > 0 ? (
               childRecords.map((child) => (
                 <div
                   key={child.id}
                   className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                  data-testid={`child-card-${child.id}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -355,6 +358,7 @@ export default function ChildForm({
                         type="button"
                         variant="outline"
                         size="sm"
+                        data-testid={`edit-child-${child.id}`}
                         onClick={() => handleEdit(child)}
                       >
                         {`Edit ${child.name}`}
@@ -363,6 +367,7 @@ export default function ChildForm({
                         type="button"
                         variant="destructive"
                         size="sm"
+                        data-testid={`remove-child-${child.id}`}
                         onClick={() => handleDelete(child.id)}
                         disabled={isPending}
                       >
@@ -373,7 +378,10 @@ export default function ChildForm({
                 </div>
               ))
             ) : (
-              <div className="rounded-xl border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600">
+              <div
+                className="rounded-xl border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600"
+                data-testid="child-list-empty"
+              >
                 No children have been added yet.
               </div>
             )}

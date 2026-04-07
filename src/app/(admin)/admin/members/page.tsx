@@ -232,6 +232,7 @@ export default async function MembersPage({
               type="text"
               name="parent"
               aria-label="Parent"
+              data-testid="admin-parent-filter"
               placeholder="Parent name or email"
               defaultValue={filters.parent}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -240,6 +241,7 @@ export default async function MembersPage({
               type="text"
               name="child"
               aria-label="Child"
+              data-testid="admin-child-filter"
               placeholder="Child name"
               defaultValue={filters.child}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -248,6 +250,7 @@ export default async function MembersPage({
               type="text"
               name="center"
               aria-label="Center"
+              data-testid="admin-center-filter"
               placeholder="Childcare center"
               defaultValue={filters.center}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -257,6 +260,7 @@ export default async function MembersPage({
                 type="text"
                 name="class"
                 aria-label="Class"
+                data-testid="admin-class-filter"
                 placeholder="Class name"
                 defaultValue={filters.class}
                 className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"

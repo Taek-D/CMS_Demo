@@ -67,6 +67,8 @@ export default async function ChildrenPage() {
   );
 
   return (
-    <ChildForm childRecords={children} centers={centers} classes={classes} />
+    <div data-testid="children-page">
+      <ChildForm childRecords={children} centers={centers} classes={classes} />
+    </div>
   );
 }
