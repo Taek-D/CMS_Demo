@@ -64,9 +64,17 @@ type MemberRecord = {
   name: string;
   email: string;
   created_at: string;
-  cms_bank_accounts: AccountRecord[] | null;
-  children: ChildRecord[] | null;
+  cms_bank_accounts: AccountRecord | AccountRecord[] | null;
+  children: ChildRecord | ChildRecord[] | null;
 };
+
+function asArray<T>(value: T | T[] | null | undefined) {
+  if (!value) {
+    return [] as T[];
+  }
+
+  return Array.isArray(value) ? value : [value];
+}
 
 function getFilterValue(value?: string | string[]) {
   if (Array.isArray(value)) {
@@ -154,8 +162,7 @@ function decorateMembers(members: MemberRecord[] | null) {
 
   return members.map((member) => ({
     ...member,
-    cms_bank_accounts:
-      member.cms_bank_accounts?.map((account) => {
+    cms_bank_accounts: asArray(member.cms_bank_accounts).map((account) => {
         try {
           return {
             ...account,
@@ -167,8 +174,8 @@ function decorateMembers(members: MemberRecord[] | null) {
             masked_account: '***',
           };
         }
-      }) ?? [],
-    children: member.children ?? [],
+      }),
+    children: asArray(member.children),
   }));
 }
 
