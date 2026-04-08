@@ -22,14 +22,24 @@ function canExportStatement(params: OverdueSearchParams) {
 }
 
 function toQueryString(params: OverdueSearchParams) {
-  const entries = Object.entries(params).flatMap(([key, value]) => {
+  const entries: Array<[string, string]> = [];
+
+  for (const [key, value] of Object.entries(params)) {
     if (Array.isArray(value)) {
       const firstValue = value[0]?.trim();
-      return firstValue ? [[key, firstValue] as const] : [];
+      if (firstValue) {
+        entries.push([key, firstValue]);
+      }
+
+      continue;
     }
 
-    return value?.trim() ? [[key, value.trim()] as const] : [];
-  });
+    const trimmedValue = value?.trim();
+
+    if (trimmedValue) {
+      entries.push([key, trimmedValue]);
+    }
+  }
 
   return new URLSearchParams(entries).toString();
 }
