@@ -1,6 +1,3 @@
-import { requireAdmin } from '@/lib/admin-auth';
-import { createClient } from '@/lib/supabase/server';
-import { decryptAccount, maskAccount } from '@/lib/crypto';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -11,6 +8,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { decryptAccount, maskAccount } from '@/lib/crypto';
+import { requireAdmin } from '@/lib/admin-auth';
+import { createServiceClient } from '@/lib/supabase/server';
+import type { BankAccount, BillingBatch, BillingResult, Member } from '@/types/database';
+import Link from 'next/link';
+
+type ResultRow = BillingResult & {
+  cms_members: Pick<Member, 'member_no' | 'name' | 'email'>;
+  cms_bank_accounts: Pick<BankAccount, 'account_number_enc' | 'bank_code'> & {
+    account_number?: string;
+    masked_account?: string;
+  };
+};
 
 export default async function ResultsPage({
   searchParams,
@@ -18,20 +28,18 @@ export default async function ResultsPage({
   searchParams: Promise<{ batch_id?: string; filter?: string }>;
 }) {
   await requireAdmin();
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const params = await searchParams;
   const batchId = params.batch_id;
   const filter = params.filter;
 
-  // 배치 목록 조회
   const { data: batches } = await supabase
     .from('cms_billing_batches')
     .select('*')
     .order('created_at', { ascending: false });
 
-  // 선택한 배치의 결과 조회
-  let results: any[] = [];
-  let selectedBatch: any = null;
+  let results: ResultRow[] = [];
+  let selectedBatch: BillingBatch | null = null;
 
   if (batchId) {
     const { data: batch } = await supabase
@@ -39,7 +47,7 @@ export default async function ResultsPage({
       .select('*')
       .eq('id', batchId)
       .single();
-    selectedBatch = batch;
+    selectedBatch = (batch as BillingBatch | null) ?? null;
 
     let query = supabase
       .from('cms_billing_results')
@@ -63,9 +71,8 @@ export default async function ResultsPage({
     }
 
     const { data } = await query;
-    results = data || [];
+    results = (data as ResultRow[] | null) || [];
 
-    // 계좌번호 복호화
     for (const result of results) {
       try {
         result.cms_bank_accounts.account_number = decryptAccount(
@@ -79,6 +86,14 @@ export default async function ResultsPage({
       }
     }
   }
+
+  const overdueQuery = new URLSearchParams({ status: 'failed' });
+
+  if (selectedBatch?.batch_month) {
+    overdueQuery.set('month', selectedBatch.batch_month);
+  }
+
+  const overdueHref = `/admin/overdue?${overdueQuery.toString()}`;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -94,10 +109,9 @@ export default async function ResultsPage({
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">출금 결과 조회</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 text-3xl font-bold text-gray-900">출금 결과 조회</h1>
 
-      {/* 배치 선택 */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>배치 회차 선택</CardTitle>
@@ -108,9 +122,9 @@ export default async function ResultsPage({
               <a
                 key={batch.id}
                 href={`/admin/results?batch_id=${batch.id}`}
-                className={`px-4 py-2 rounded-lg border transition ${
+                className={`rounded-lg border px-4 py-2 transition ${
                   batchId === batch.id
-                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    ? 'border-indigo-600 bg-indigo-600 text-white'
                     : 'bg-white hover:bg-gray-50'
                 }`}
               >
@@ -121,15 +135,14 @@ export default async function ResultsPage({
               </a>
             ))}
             {(!batches || batches.length === 0) && (
-              <p className="text-gray-500 py-4">아직 실행된 배치가 없습니다</p>
+              <p className="py-4 text-gray-500">아직 실행된 배치가 없습니다</p>
             )}
           </div>
         </CardContent>
       </Card>
 
-      {/* 선택한 배치 요약 */}
       {selectedBatch && (
-        <div className="grid gap-6 md:grid-cols-4 mb-6">
+        <div className="mb-6 grid gap-6 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-gray-600">총 대상</CardTitle>
@@ -162,19 +175,39 @@ export default async function ResultsPage({
               <p className="text-3xl font-bold text-indigo-600">
                 {selectedBatch.total_count > 0
                   ? ((selectedBatch.success_count / selectedBatch.total_count) * 100).toFixed(1)
-                  : 0}%
+                  : 0}
+                %
               </p>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* 필터 */}
+      <Card className="mb-6 border-indigo-200 bg-indigo-50/60">
+        <CardContent className="flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium text-indigo-900">Overdue follow-up</p>
+            <p className="text-sm text-indigo-800">
+              {selectedBatch
+                ? `Open overdue management for ${selectedBatch.batch_month} failed results.`
+                : 'Open overdue management and start from failed results.'}
+            </p>
+          </div>
+          <Link
+            href={overdueHref}
+            data-testid="results-overdue-link"
+            className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Open overdue management
+          </Link>
+        </CardContent>
+      </Card>
+
       {results.length > 0 && (
-        <div className="flex gap-2 mb-4">
+        <div className="mb-4 flex gap-2">
           <a
             href={`/admin/results?batch_id=${batchId}`}
-            className={`px-3 py-1 rounded-md text-sm ${
+            className={`rounded-md px-3 py-1 text-sm ${
               !filter ? 'bg-indigo-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
             }`}
           >
@@ -182,16 +215,15 @@ export default async function ResultsPage({
           </a>
           <a
             href={`/admin/results?batch_id=${batchId}&filter=failed`}
-            className={`px-3 py-1 rounded-md text-sm ${
+            className={`rounded-md px-3 py-1 text-sm ${
               filter === 'failed' ? 'bg-red-600 text-white' : 'bg-gray-100 hover:bg-gray-200'
             }`}
           >
-            실패 ({results.filter((r) => r.status === 'failed').length})
+            실패 ({results.filter((result) => result.status === 'failed').length})
           </a>
         </div>
       )}
 
-      {/* 결과 테이블 */}
       {results.length > 0 ? (
         <Card>
           <CardContent className="p-0">
@@ -219,9 +251,7 @@ export default async function ResultsPage({
                       {result.amount.toLocaleString()}원
                     </TableCell>
                     <TableCell>{getStatusBadge(result.status)}</TableCell>
-                    <TableCell className="text-red-600">
-                      {result.fail_reason || '-'}
-                    </TableCell>
+                    <TableCell className="text-red-600">{result.fail_reason || '-'}</TableCell>
                     <TableCell className="text-sm text-gray-600">
                       {result.processed_at
                         ? new Date(result.processed_at).toLocaleString('ko-KR')
@@ -235,7 +265,7 @@ export default async function ResultsPage({
         </Card>
       ) : (
         batchId && (
-          <Card>
+            <Card>
             <CardContent className="py-12 text-center text-gray-500">
               조회된 출금 결과가 없습니다
             </CardContent>

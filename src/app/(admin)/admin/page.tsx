@@ -1,13 +1,12 @@
-import { requireAdmin } from '@/lib/admin-auth';
-import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { requireAdmin } from '@/lib/admin-auth';
+import { createServiceClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
-  // 통계 조회
   const { count: totalMembers } = await supabase
     .from('cms_members')
     .select('*', { count: 'exact', head: true });
@@ -32,14 +31,18 @@ export default async function AdminDashboardPage() {
     { label: '총 회원 수', value: totalMembers || 0, color: 'text-blue-600' },
     { label: '등록된 계좌', value: totalAccounts || 0, color: 'text-green-600' },
     { label: '출금 동의 완료', value: consentedAccounts || 0, color: 'text-indigo-600' },
-    { label: '마지막 배치 월', value: latestBatch?.batch_month || '-', color: 'text-purple-600' },
+    {
+      label: '마지막 배치 월',
+      value: latestBatch?.batch_month || '-',
+      color: 'text-purple-600',
+    },
   ];
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">관리자 대시보드</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 text-3xl font-bold text-gray-900">관리자 대시보드</h1>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label}>
             <CardHeader className="pb-2">
@@ -48,9 +51,7 @@ export default async function AdminDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className={`text-3xl font-bold ${stat.color}`}>
-                {stat.value}
-              </div>
+              <div className={`text-3xl font-bold ${stat.color}`}>{stat.value}</div>
             </CardContent>
           </Card>
         ))}
@@ -63,21 +64,29 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             <Link href="/admin/members">
-              <button className="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+              <button className="w-full rounded-lg bg-gray-50 p-3 text-left transition hover:bg-gray-100">
                 <p className="font-medium">회원 관리</p>
                 <p className="text-sm text-gray-600">전체 회원 목록 및 계좌 조회</p>
               </button>
             </Link>
             <Link href="/admin/billing">
-              <button className="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+              <button className="w-full rounded-lg bg-gray-50 p-3 text-left transition hover:bg-gray-100">
                 <p className="font-medium">배치 출금 실행</p>
                 <p className="text-sm text-gray-600">이번 달 출금 일괄 처리</p>
               </button>
             </Link>
             <Link href="/admin/results">
-              <button className="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition">
+              <button className="w-full rounded-lg bg-gray-50 p-3 text-left transition hover:bg-gray-100">
                 <p className="font-medium">출금 결과 조회</p>
                 <p className="text-sm text-gray-600">배치별 출금 결과 확인</p>
+              </button>
+            </Link>
+            <Link href="/admin/overdue">
+              <button className="w-full rounded-lg bg-gray-50 p-3 text-left transition hover:bg-gray-100">
+                <p className="font-medium">Overdue Management</p>
+                <p className="text-sm text-gray-600">
+                  Review failed billing rows and export scoped statements
+                </p>
               </button>
             </Link>
           </CardContent>
@@ -92,10 +101,15 @@ export default async function AdminDashboardPage() {
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">배치 월: {latestBatch.batch_month}</p>
                 <p className="text-sm text-gray-600">상태: {latestBatch.status}</p>
-                <p className="text-sm text-gray-600">총 {latestBatch.total_count}건 | 성공 {latestBatch.success_count}건 | 실패 {latestBatch.fail_count}건</p>
+                <p className="text-sm text-gray-600">
+                  총 {latestBatch.total_count}건 | 성공 {latestBatch.success_count}건 | 실패{' '}
+                  {latestBatch.fail_count}건
+                </p>
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">아직 실행된 배치가 없습니다</p>
+              <p className="py-4 text-center text-gray-500">
+                아직 실행된 배치가 없습니다
+              </p>
             )}
           </CardContent>
         </Card>
