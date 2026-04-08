@@ -83,9 +83,9 @@ Plans:
 
 ## Next Step
 
-`Run Phase 04 verification/closeout now that overdue management, scoped XLSX export, and the results-to-overdue Playwright proof are complete`
+`Wait for one fresh Supabase Auth signup window to retry MEM-01, then run $gsd-complete-milestone when the milestone is ready to archive`
 
 Phase 4 is now complete. The admin overdue route, scoped XLSX export, discoverability links, and deterministic browser proof are all in place on top of the verified member, billing, parent, child, center, and class flows.
 
 ---
-*Last updated: 2026-04-08 after completing Phase 04 Plan 03 overdue discoverability and Playwright proof work*
+*Last updated: 2026-04-08 after Phase 04 verification passed*
