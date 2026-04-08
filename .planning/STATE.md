@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-04-08T09:12:04.752Z"
+status: verifying
+last_updated: "2026-04-08T09:31:03.716Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 ## Project Reference
@@ -23,7 +23,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-08)
 
 Phase: 04 (overdue-statement-excel) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-08
 
 ## Accumulated Context
@@ -62,6 +62,8 @@ Last activity: 2026-04-08
 - `npx playwright test tests/member-billing-smoke.spec.ts` now passes with deterministic user seeding and coverage for `/dashboard`, `/account`, `/consent`, `/payments`, `/children`, and `/admin/members`.
 - `npx vitest run "src/app/(admin)/admin/members/page.test.tsx"` still passes after normalizing live admin CRM relation payloads.
 - A broader Phase 3 Vitest sweep found an out-of-scope dirty-worktree mismatch in `src/app/(member)/children/child-form.test.tsx`; it is logged in `.planning/phases/03-parent-childcare-domain/deferred-items.md`.
+- `npm run lint` passes after wiring `/admin/overdue` into the admin shell, dashboard, and billing results flow.
+- `npx playwright test tests/admin-overdue-export.spec.ts --project=chromium` now passes with deterministic seeding for the results -> overdue -> month/center/class scoped XLSX export path.
 
 ## Remaining Blocker
 
@@ -69,7 +71,7 @@ Last activity: 2026-04-08
 
 ## Next Action
 
-- Execute Phase 04 Plan 03 to wire the overdue tooling into the admin journey and verify the results-to-export path with Playwright.
+- Run Phase 04 verification/closeout on the now-complete overdue discoverability and export proof work.
 
 ## Decisions
 
@@ -90,6 +92,8 @@ Last activity: 2026-04-08
 - [Phase 04-overdue-statement-excel]: Used ExcelJS only on the server export route so XLSX generation stays behind admin auth and reflects live overdue data.
 - [Phase 04-overdue-statement-excel]: Rejected export requests before any data fetch when month, center, or class is missing to enforce the explicit statement scope contract.
 - [Phase 04-overdue-statement-excel]: Reused normalizeOverdueFilters and fetchOverdueRows in the export route so the workbook matches the overdue page row semantics.
+- [Phase 04-overdue-statement-excel]: Kept overdue discoverability additive by linking into /admin/overdue instead of merging overdue data into existing admin pages.
+- [Phase 04-overdue-statement-excel]: Seeded the Phase 4 regression with fixed month, center, class, amount, and fail reason values so the browser proof remains deterministic on the linked Supabase environment.
 
 ## Performance Metrics
 
@@ -101,8 +105,9 @@ Last activity: 2026-04-08
 | 03-parent-childcare-domain | 04 | 19 min | 2 | 6 | 2026-04-08 |
 | 04-overdue-statement-excel | 01 | 4 min | 2 | 3 | 2026-04-08 |
 | Phase 04-overdue-statement-excel P02 | 15 min | 2 tasks | 5 files |
+| Phase 04-overdue-statement-excel P03 | 32 min | 2 tasks | 5 files |
 
 ## Session Info
 
-- Last session: 2026-04-08T18:12:04+09:00
-- Stopped At: Completed 04-02-PLAN.md
+- Last session: 2026-04-08T18:28:58+09:00
+- Stopped At: Completed 04-03-PLAN.md

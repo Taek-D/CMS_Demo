@@ -92,6 +92,8 @@
 - `SC-04-02` is complete because `04-01` now supports URL-driven month, childcare center, class, status, and parent-or-child search filters with Vitest coverage.
 - `SC-04-03` is complete because `04-02` now ships an admin-only `exceljs` export route at `/admin/overdue/export` with XLSX attachment coverage and the explicit month/center/class scope contract.
 - `SC-04-04` is complete because `04-02` reuses the shared overdue filters and aggregated member-level row semantics from `04-01` inside the workbook route and its route-level tests.
+- `SC-04-03` is now also discoverable from the admin shell, dashboard, and billing results screen through the completed `04-03` wiring work.
+- `SC-04-04` is now backed by a passing deterministic Playwright regression that seeds a failed `2026-04` billing result, scopes overdue filtering to `Morning Star Childcare` and `Sun Class`, and verifies the real XLSX download filename.
 
 **Coverage:**
 - v1 requirements: 8 total
@@ -102,4 +104,4 @@
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-08 after completing Phase 04 Plan 02 overdue export work*
+*Last updated: 2026-04-08 after completing Phase 04 Plan 03 overdue discoverability and proof work*
