@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import ChildForm from './child-form';
-import { memberNavItems } from '../layout';
 import { buildDashboardChildrenSummary } from '../dashboard/page';
+import { memberNavItems } from '../layout';
+import ChildForm from './child-form';
 
 const { mockRefresh, mockCreateChild, mockUpdateChild, mockDeleteChild } = vi.hoisted(
   () => ({
@@ -27,14 +27,14 @@ vi.mock('./actions', () => ({
 }));
 
 const centers = [
-  { id: 'center-1', name: 'Morning Star Childcare', created_at: '2026-04-07T00:00:00Z' },
-  { id: 'center-2', name: 'River Kids Center', created_at: '2026-04-07T00:00:00Z' },
+  { id: 'center-1', name: '별꽃 어린이집', created_at: '2026-04-07T00:00:00Z' },
+  { id: 'center-2', name: '강변 키즈 어린이집', created_at: '2026-04-07T00:00:00Z' },
 ];
 
 const classes = [
-  { id: 'class-1', center_id: 'center-1', name: 'Sun Class', created_at: '2026-04-07T00:00:00Z' },
-  { id: 'class-2', center_id: 'center-1', name: 'Moon Class', created_at: '2026-04-07T00:00:00Z' },
-  { id: 'class-3', center_id: 'center-2', name: 'Star Class', created_at: '2026-04-07T00:00:00Z' },
+  { id: 'class-1', center_id: 'center-1', name: '해님반', created_at: '2026-04-07T00:00:00Z' },
+  { id: 'class-2', center_id: 'center-1', name: '달님반', created_at: '2026-04-07T00:00:00Z' },
+  { id: 'class-3', center_id: 'center-2', name: '별님반', created_at: '2026-04-07T00:00:00Z' },
 ];
 
 const children = [
@@ -42,18 +42,18 @@ const children = [
     id: 'child-1',
     parent_member_id: 'parent-1',
     class_id: 'class-1',
-    name: 'Minji',
+    name: '민지',
     birth_date: null,
     created_at: '2026-04-07T00:00:00Z',
     updated_at: '2026-04-07T00:00:00Z',
     cms_childcare_classes: {
       id: 'class-1',
       center_id: 'center-1',
-      name: 'Sun Class',
+      name: '해님반',
       created_at: '2026-04-07T00:00:00Z',
       cms_childcare_centers: {
         id: 'center-1',
-        name: 'Morning Star Childcare',
+        name: '별꽃 어린이집',
         created_at: '2026-04-07T00:00:00Z',
       },
     },
@@ -73,15 +73,15 @@ describe('ChildForm', () => {
       <ChildForm childRecords={children} centers={centers} classes={classes} />
     );
 
-    fireEvent.change(screen.getByLabelText(/search center/i), {
-      target: { value: 'river' },
+    fireEvent.change(screen.getByLabelText(/어린이집 검색/i), {
+      target: { value: '강변' },
     });
 
     expect(
-      screen.queryByRole('button', { name: /morning star childcare/i })
+      screen.queryByRole('button', { name: /별꽃 어린이집/i })
     ).toBeNull();
     expect(
-      screen.getByRole('button', { name: /river kids center/i })
+      screen.getByRole('button', { name: /강변 키즈 어린이집/i })
     ).toBeTruthy();
   });
 
@@ -90,17 +90,17 @@ describe('ChildForm', () => {
       <ChildForm childRecords={children} centers={centers} classes={classes} />
     );
 
-    const classTrigger = screen.getByTestId('class-select-trigger');
+    const classTrigger = screen.getByTestId('class-select');
     expect(classTrigger.getAttribute('disabled')).not.toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: /morning star childcare/i }));
+    fireEvent.click(screen.getByRole('button', { name: /별꽃 어린이집/i }));
 
     expect(classTrigger.getAttribute('disabled')).toBeNull();
     fireEvent.click(classTrigger);
 
-    expect((await screen.findAllByText('Sun Class')).length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Moon Class').length).toBeGreaterThan(0);
-    expect(screen.queryByText('Star Class')).toBeNull();
+    expect((await screen.findAllByText('해님반')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText('달님반').length).toBeGreaterThan(0);
+    expect(screen.queryByText('별님반')).toBeNull();
   });
 
   it('preloads name, center, and class values when editing an existing child', async () => {
@@ -108,22 +108,20 @@ describe('ChildForm', () => {
       <ChildForm childRecords={children} centers={centers} classes={classes} />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /edit minji/i }));
+    fireEvent.click(screen.getByRole('button', { name: '수정' }));
 
     expect(
-      (screen.getByLabelText(/child name/i) as HTMLInputElement).value
-    ).toBe('Minji');
+      (screen.getByLabelText(/자녀 이름/i) as HTMLInputElement).value
+    ).toBe('민지');
     expect(
-      screen.getByText(/selected center: morning star childcare/i)
+      screen.getByText(/선택한 어린이집: 별꽃 어린이집/i)
     ).toBeTruthy();
-    expect(screen.getByTestId('class-select-trigger').textContent).toContain(
-      'Sun Class'
-    );
+    expect(screen.getByTestId('class-select').textContent).toContain('해님반');
 
-    fireEvent.change(screen.getByLabelText(/child name/i), {
+    fireEvent.change(screen.getByLabelText(/자녀 이름/i), {
       target: { value: 'Minseo' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /save child/i }));
+    fireEvent.click(screen.getByRole('button', { name: '자녀 정보 저장' }));
 
     await waitFor(() => {
       expect(mockUpdateChild).toHaveBeenCalledOnce();
@@ -135,19 +133,19 @@ describe('ChildForm', () => {
       <ChildForm childRecords={children} centers={centers} classes={classes} />
     );
 
-    fireEvent.change(screen.getByLabelText(/child name/i), {
+    fireEvent.change(screen.getByLabelText(/자녀 이름/i), {
       target: { value: 'Haneul' },
     });
-    fireEvent.click(screen.getByRole('button', { name: /river kids center/i }));
-    fireEvent.click(screen.getByTestId('class-select-trigger'));
-    fireEvent.click(await screen.findByText('Star Class'));
-    fireEvent.click(screen.getByRole('button', { name: /add child/i }));
+    fireEvent.click(screen.getByRole('button', { name: /강변 키즈 어린이집/i }));
+    fireEvent.click(screen.getByTestId('class-select'));
+    fireEvent.click(await screen.findByText('별님반'));
+    fireEvent.click(screen.getByRole('button', { name: '자녀 등록' }));
 
     await waitFor(() => {
       expect(mockCreateChild).toHaveBeenCalledOnce();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /remove minji/i }));
+    fireEvent.click(screen.getByRole('button', { name: '삭제' }));
 
     await waitFor(() => {
       expect(mockDeleteChild).toHaveBeenCalledOnce();

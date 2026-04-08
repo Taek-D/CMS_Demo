@@ -4,22 +4,10 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type {
   ChildcareCenterSummary,
   ChildcareClassSummary,
@@ -148,7 +136,7 @@ export default function ChildForm({
           : await createChild(formData);
 
         if (!result.success) {
-          setError(result.error ?? 'Unable to save child.');
+          setError(result.error ?? '자녀 정보를 저장하지 못했습니다.');
           return;
         }
 
@@ -169,7 +157,7 @@ export default function ChildForm({
         const result = await deleteChild(formData);
 
         if (!result.success) {
-          setError(result.error ?? 'Unable to remove child.');
+          setError(result.error ?? '자녀 정보를 삭제하지 못했습니다.');
           return;
         }
 
@@ -183,26 +171,27 @@ export default function ChildForm({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Manage Children</CardTitle>
+    <div className="shell-frame px-4 pb-8 sm:px-6 lg:px-8">
+      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <Card className="border-border/70">
+          <CardHeader className="space-y-4">
+            <span className="section-eyebrow">자녀 등록</span>
+            <CardTitle className="text-[1.9rem]">자녀 정보와 소속 반을 연결하세요</CardTitle>
             <CardDescription>
-              Search a center, lock the class list to that center, then add or edit a
-              child from the same surface.
+              어린이집을 먼저 찾고, 해당 기관에 속한 반만 선택할 수 있도록 구성했습니다.
+              한 화면에서 신규 등록과 수정까지 이어서 처리할 수 있습니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6" data-testid="child-form">
             {error ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="rounded-[1.15rem] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="child-name">Child Name</Label>
+                <Label htmlFor="child-name">자녀 이름</Label>
                 <Input
                   id="child-name"
                   name="name"
@@ -213,11 +202,11 @@ export default function ChildForm({
                       name: event.target.value,
                     }))
                   }
-                  placeholder="Enter child name"
+                  placeholder="자녀 이름을 입력해 주세요"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="birth-date">Birth Date</Label>
+                <Label htmlFor="birth-date">생년월일</Label>
                 <Input
                   id="birth-date"
                   name="birth_date"
@@ -234,7 +223,7 @@ export default function ChildForm({
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="center-search">Search Center</Label>
+              <Label htmlFor="center-search">어린이집 검색</Label>
               <Input
                 id="center-search"
                 data-testid="center-search"
@@ -245,7 +234,7 @@ export default function ChildForm({
                     centerSearch: event.target.value,
                   }))
                 }
-                placeholder="Type a center name"
+                placeholder="어린이집 이름을 입력해 주세요"
               />
               <div className="grid gap-2 sm:grid-cols-2" data-testid="center-select">
                 {filteredCenters.map((center) => (
@@ -255,7 +244,7 @@ export default function ChildForm({
                     variant={
                       center.id === formState.selectedCenterId ? 'default' : 'outline'
                     }
-                    className="justify-start"
+                    className="h-auto min-h-14 justify-start px-4 py-3 text-left"
                     aria-pressed={center.id === formState.selectedCenterId}
                     data-testid={`center-select-${center.id}`}
                     onClick={() => handleCenterSelect(center.id)}
@@ -264,19 +253,19 @@ export default function ChildForm({
                   </Button>
                 ))}
               </div>
-              <p className="text-sm text-gray-600">
-                Selected center: {selectedCenter?.name ?? 'None'}
+              <p className="text-sm text-muted-foreground">
+                선택한 어린이집: {selectedCenter?.name ?? '아직 선택하지 않았습니다'}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="class-select-trigger">Class</Label>
+              <Label htmlFor="class-select-trigger">반 선택</Label>
               <Select
                 value={formState.classId}
                 onValueChange={(value) =>
                   setFormState((current) => ({
                     ...current,
-                    classId: value,
+                    classId: value ?? '',
                   }))
                 }
                 disabled={!formState.selectedCenterId}
@@ -288,7 +277,7 @@ export default function ChildForm({
                   disabled={!formState.selectedCenterId}
                 >
                   <SelectValue>
-                    {selectedClassLabel || 'Select a class'}
+                    {selectedClassLabel || '반을 선택해 주세요'}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -304,6 +293,7 @@ export default function ChildForm({
             <div className="flex flex-wrap gap-3">
               <Button
                 type="button"
+                size="lg"
                 onClick={handleSubmit}
                 disabled={
                   isPending ||
@@ -312,27 +302,29 @@ export default function ChildForm({
                   !formState.classId
                 }
               >
-                {formState.childId ? 'Save Child' : 'Add Child'}
+                {formState.childId ? '자녀 정보 저장' : '자녀 등록'}
               </Button>
               {formState.childId ? (
                 <Button
                   type="button"
                   variant="outline"
+                  size="lg"
                   onClick={resetForm}
                   disabled={isPending}
                 >
-                  Cancel Edit
+                  수정 취소
                 </Button>
               ) : null}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Current Children</CardTitle>
+        <Card className="border-border/70">
+          <CardHeader className="space-y-4">
+            <span className="section-eyebrow">등록 현황</span>
+            <CardTitle className="text-[1.9rem]">현재 등록된 자녀</CardTitle>
             <CardDescription>
-              Edit or remove existing children without leaving this page.
+              이미 등록한 자녀 정보는 오른쪽 목록에서 바로 수정하거나 삭제할 수 있습니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4" data-testid="child-list">
@@ -340,16 +332,18 @@ export default function ChildForm({
               childRecords.map((child) => (
                 <div
                   key={child.id}
-                  className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                  className="rounded-[1.35rem] border border-border/70 bg-[color:var(--surface-strong)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)]"
                   data-testid={`child-card-${child.id}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold text-gray-900">{child.name}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-semibold text-[color:var(--brand-ink)]">
+                        {child.name}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
                         {child.cms_childcare_classes.cms_childcare_centers.name}
                       </p>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {child.cms_childcare_classes.name}
                       </p>
                     </div>
@@ -361,7 +355,7 @@ export default function ChildForm({
                         data-testid={`edit-child-${child.id}`}
                         onClick={() => handleEdit(child)}
                       >
-                        {`Edit ${child.name}`}
+                        수정
                       </Button>
                       <Button
                         type="button"
@@ -371,7 +365,7 @@ export default function ChildForm({
                         onClick={() => handleDelete(child.id)}
                         disabled={isPending}
                       >
-                        {`Remove ${child.name}`}
+                        삭제
                       </Button>
                     </div>
                   </div>
@@ -379,10 +373,10 @@ export default function ChildForm({
               ))
             ) : (
               <div
-                className="rounded-xl border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600"
+                className="rounded-[1.35rem] border border-dashed border-border px-4 py-6 text-sm text-muted-foreground"
                 data-testid="child-list-empty"
               >
-                No children have been added yet.
+                등록된 자녀가 아직 없습니다.
               </div>
             )}
           </CardContent>

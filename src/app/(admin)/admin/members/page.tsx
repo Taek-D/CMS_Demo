@@ -9,8 +9,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { requireAdmin } from '@/lib/admin-auth';
-import { decryptAccount, maskAccount } from '@/lib/crypto';
 import { BANK_CODES } from '@/lib/constants';
+import { decryptAccount, maskAccount } from '@/lib/crypto';
 import { createServiceClient } from '@/lib/supabase/server';
 
 export type MembersSearchParams = {
@@ -163,18 +163,18 @@ function decorateMembers(members: MemberRecord[] | null) {
   return members.map((member) => ({
     ...member,
     cms_bank_accounts: asArray(member.cms_bank_accounts).map((account) => {
-        try {
-          return {
-            ...account,
-            masked_account: maskAccount(decryptAccount(account.account_number_enc)),
-          };
-        } catch {
-          return {
-            ...account,
-            masked_account: '***',
-          };
-        }
-      }),
+      try {
+        return {
+          ...account,
+          masked_account: maskAccount(decryptAccount(account.account_number_enc)),
+        };
+      } catch {
+        return {
+          ...account,
+          masked_account: '***',
+        };
+      }
+    }),
     children: asArray(member.children),
   }));
 }
@@ -190,17 +190,17 @@ function joinNames(values: Array<string | null | undefined>) {
 function getConsentBadge(status: string) {
   switch (status) {
     case 'consented':
-      return <Badge className="bg-green-500">Consented</Badge>;
+      return <Badge className="bg-green-500">동의 완료</Badge>;
     case 'pending':
       return (
         <Badge variant="secondary" className="bg-yellow-500 text-black">
-          Pending
+          대기 중
         </Badge>
       );
     case 'revoked':
       return (
         <Badge variant="outline" className="bg-gray-500 text-white">
-          Revoked
+          철회됨
         </Badge>
       );
     default:
@@ -230,7 +230,7 @@ export default async function MembersPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">Members CRM</h1>
+      <h1 className="mb-8 text-3xl font-bold text-gray-900">회원 CRM</h1>
 
       <Card className="mb-6">
         <CardContent className="pt-6">
@@ -238,27 +238,27 @@ export default async function MembersPage({
             <input
               type="text"
               name="parent"
-              aria-label="Parent"
+              aria-label="학부모"
               data-testid="admin-parent-filter"
-              placeholder="Parent name or email"
+              placeholder="학부모 이름 또는 이메일"
               defaultValue={filters.parent}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <input
               type="text"
               name="child"
-              aria-label="Child"
+              aria-label="자녀"
               data-testid="admin-child-filter"
-              placeholder="Child name"
+              placeholder="자녀 이름"
               defaultValue={filters.child}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <input
               type="text"
               name="center"
-              aria-label="Center"
+              aria-label="어린이집"
               data-testid="admin-center-filter"
-              placeholder="Childcare center"
+              placeholder="어린이집 이름"
               defaultValue={filters.center}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -266,9 +266,9 @@ export default async function MembersPage({
               <input
                 type="text"
                 name="class"
-                aria-label="Class"
+                aria-label="반"
                 data-testid="admin-class-filter"
-                placeholder="Class name"
+                placeholder="반 이름"
                 defaultValue={filters.class}
                 className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -276,7 +276,7 @@ export default async function MembersPage({
                 type="submit"
                 className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
               >
-                Search
+                조회
               </button>
             </div>
           </form>
@@ -288,18 +288,18 @@ export default async function MembersPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Member No.</TableHead>
-                <TableHead>Parent</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Child Count</TableHead>
-                <TableHead>Children</TableHead>
-                <TableHead>Centers</TableHead>
-                <TableHead>Classes</TableHead>
-                <TableHead>Bank</TableHead>
-                <TableHead>Masked Account</TableHead>
-                <TableHead>Account Holder</TableHead>
-                <TableHead>Consent</TableHead>
-                <TableHead>Created At</TableHead>
+                <TableHead>회원번호</TableHead>
+                <TableHead>학부모</TableHead>
+                <TableHead>이메일</TableHead>
+                <TableHead>자녀 수</TableHead>
+                <TableHead>자녀 이름</TableHead>
+                <TableHead>어린이집</TableHead>
+                <TableHead>반</TableHead>
+                <TableHead>은행</TableHead>
+                <TableHead>마스킹 계좌</TableHead>
+                <TableHead>예금주</TableHead>
+                <TableHead>동의 상태</TableHead>
+                <TableHead>가입일</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -328,7 +328,7 @@ export default async function MembersPage({
                     <TableCell className="font-mono">{account?.masked_account ?? '-'}</TableCell>
                     <TableCell>{account?.account_holder ?? '-'}</TableCell>
                     <TableCell>
-                      {account ? getConsentBadge(account.consent_status) : <Badge variant="outline">No account</Badge>}
+                      {account ? getConsentBadge(account.consent_status) : <Badge variant="outline">계좌 없음</Badge>}
                     </TableCell>
                     <TableCell className="text-sm text-gray-600">
                       {new Date(member.created_at).toLocaleDateString('ko-KR')}
@@ -340,7 +340,7 @@ export default async function MembersPage({
           </Table>
 
           {members.length === 0 && (
-            <div className="py-12 text-center text-gray-500">No members match the current filters.</div>
+            <div className="py-12 text-center text-gray-500">현재 필터에 맞는 회원이 없습니다.</div>
           )}
         </CardContent>
       </Card>

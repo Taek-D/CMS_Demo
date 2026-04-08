@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+  const supabaseResponse = NextResponse.next({
     request,
   });
 
@@ -28,9 +28,7 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged in.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }

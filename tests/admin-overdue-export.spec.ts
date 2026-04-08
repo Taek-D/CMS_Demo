@@ -20,15 +20,15 @@ type SmokeUser = {
   phone: string;
 };
 
-const MORNING_STAR_CENTER_NAME = 'Morning Star Childcare';
+const MORNING_STAR_CENTER_NAME = '별꽃 어린이집';
 const SUN_CLASS_ID = '11111111-aaaa-1111-aaaa-111111111111';
-const SUN_CLASS_NAME = 'Sun Class';
-const OVERDUE_CHILD_NAME = 'Phase 4 Overdue Child';
+const SUN_CLASS_NAME = '해님반';
+const OVERDUE_CHILD_NAME = '4단계 미납 아동';
 const BATCH_MONTH = '2026-04';
 const BILLING_AMOUNT = 47000;
-const FAIL_REASON = 'Insufficient funds';
+const FAIL_REASON = '잔액 부족';
 const EXPECTED_DOWNLOAD_NAME =
-  'overdue-statement-2026-04-morning-star-childcare-sun-class.xlsx';
+  '미납명세표-2026-04-별꽃-어린이집-해님반.xlsx';
 
 const env = loadRequiredEnv();
 const supabase = createClient(
@@ -44,17 +44,17 @@ const supabase = createClient(
 
 const adminProfile = {
   email: env.ADMIN_EMAIL,
-  password: 'Phase4Admin!234',
-  name: 'Phase 4 Smoke Admin',
+  password: 'AdminSmoke!234',
+  name: '4단계 스모크 관리자',
   phone: '01090000001',
 };
 
 const overdueParentProfile = {
   email: 'phase4.overdue.parent@example.com',
   password: 'Phase4Parent!234',
-  name: 'Phase 4 Overdue Parent',
+  name: '4단계 미납 보호자',
   phone: '01022334455',
-  accountHolder: 'Phase 4 Overdue Parent',
+  accountHolder: '4단계 미납 보호자',
   accountNumber: '110123450987',
 };
 
@@ -449,7 +449,7 @@ async function loginThroughRealForm(page: Page, email: string, password: string)
     page.locator('button[type="submit"]').click(),
   ]);
 
-  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '로그아웃' })).toBeVisible();
 }
 
 function escapeRegExp(value: string) {

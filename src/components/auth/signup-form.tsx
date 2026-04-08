@@ -1,14 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
+import { getErrorMessage } from '@/lib/utils';
 
 export default function SignupForm() {
   const router = useRouter();
@@ -22,20 +31,19 @@ export default function SignupForm() {
     phone: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
 
-    // 유효성 검사
     if (formData.password !== formData.confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다.');
+      setError('비밀번호가 서로 일치하지 않습니다.');
       return;
     }
 
@@ -48,8 +56,6 @@ export default function SignupForm() {
 
     try {
       const supabase = createClient();
-
-      // 1. Supabase Auth에 회원가입
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -61,47 +67,52 @@ export default function SignupForm() {
         },
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        // 2. cms_members 테이블에 회원 정보 저장
-        const { error: dbError } = await supabase
-          .from('cms_members')
-          .insert({
-            id: authData.user.id,
-            email: formData.email,
-            name: formData.name,
-            phone: formData.phone || null,
-          });
-
-        if (dbError) throw dbError;
-
-        // 회원가입 성공 - 로그인 페이지로 이동
-        alert('회원가입이 완료되었습니다.');
-        router.push('/login');
+      if (authError) {
+        throw authError;
       }
-    } catch (err: any) {
-      setError(err.message || '회원가입 중 오류가 발생했습니다.');
+
+      if (!authData.user) {
+        throw new Error('회원 정보를 만들지 못했습니다.');
+      }
+
+      if (authData.session) {
+        await supabase.auth.signOut();
+      }
+
+      window.alert(
+        authData.session
+          ? '회원가입이 완료되었습니다.'
+          : '회원가입이 완료되었습니다. 로그인 화면으로 이동합니다.'
+      );
+      router.push('/login');
+    } catch (submitError: unknown) {
+      setError(getErrorMessage(submitError, '회원가입을 완료하지 못했습니다.'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">회원가입</CardTitle>
-        <CardDescription>
-          CMS 자동이체 서비스에 가입하세요
-        </CardDescription>
+    <Card className="w-full max-w-md border-border/70">
+      <CardHeader className="space-y-4">
+        <div className="space-y-2">
+          <span className="section-eyebrow">가족 계정 만들기</span>
+          <CardTitle className="text-[1.9rem]">학부모 계정을 등록하세요</CardTitle>
+          <CardDescription className="max-w-sm leading-6">
+            기본 학부모 정보를 등록한 뒤 자녀 연결, 계좌 등록, 자동이체 동의로 이어집니다.
+          </CardDescription>
+        </div>
+        <div className="rounded-[1.35rem] border border-border/70 bg-accent/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
+          가입 첫 화면부터 금융 서비스처럼 차갑지 않고, 실제 돌봄 서비스처럼 신뢰감 있게 보이도록 구성했습니다.
+        </div>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {error && (
+          {error ? (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-          )}
+          ) : null}
 
           <div className="space-y-2">
             <Label htmlFor="email">이메일</Label>
@@ -109,7 +120,7 @@ export default function SignupForm() {
               id="email"
               name="email"
               type="email"
-              placeholder="example@email.com"
+              placeholder="parent@example.com"
               value={formData.email}
               onChange={handleChange}
               required
@@ -117,12 +128,12 @@ export default function SignupForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">이름</Label>
+            <Label htmlFor="name">학부모 이름</Label>
             <Input
               id="name"
               name="name"
               type="text"
-              placeholder="홍길동"
+              placeholder="예: 이민아"
               value={formData.name}
               onChange={handleChange}
               required
@@ -165,14 +176,14 @@ export default function SignupForm() {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? '가입 중...' : '회원가입'}
+        <CardFooter className="flex flex-col space-y-3">
+          <Button type="submit" size="lg" className="w-full" disabled={loading}>
+            {loading ? '계정 생성 중...' : '회원가입'}
           </Button>
-          <p className="text-sm text-center text-muted-foreground">
-            이미 계정이 있으신가요?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              로그인
+          <p className="text-center text-sm leading-6 text-muted-foreground">
+            이미 계정이 있나요?{' '}
+            <Link href="/login" className="font-medium text-primary hover:underline">
+              로그인으로 이동
             </Link>
           </p>
         </CardFooter>

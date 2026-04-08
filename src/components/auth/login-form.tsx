@@ -1,14 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { createClient } from '@/lib/supabase/client';
+import { getErrorMessage } from '@/lib/utils';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -19,53 +28,59 @@ export default function LoginForm() {
     password: '',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((current) => ({
+      ...current,
+      [event.target.name]: event.target.value,
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
       const supabase = createClient();
-
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        throw authError;
+      }
 
-      // 로그인 성공 - 대시보드로 이동
       router.push('/dashboard');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message || '로그인 중 오류가 발생했습니다.');
+    } catch (submitError: unknown) {
+      setError(getErrorMessage(submitError, '지금은 로그인할 수 없습니다.'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">로그인</CardTitle>
-        <CardDescription>
-          이메일과 비밀번호를 입력하세요
-        </CardDescription>
+    <Card className="w-full max-w-md border-border/70">
+      <CardHeader className="space-y-4">
+        <div className="space-y-2">
+          <span className="section-eyebrow">다시 오신 것을 환영합니다</span>
+          <CardTitle className="text-[1.9rem]">멤버 로그인</CardTitle>
+          <CardDescription className="max-w-sm leading-6">
+            가족 대시보드, 자동이체 상태, 결제 기록을 이어서 확인할 수 있습니다.
+          </CardDescription>
+        </div>
+        <div className="rounded-[1.35rem] border border-border/70 bg-accent/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
+          포트폴리오 데모 계정이나 미리 생성한 멤버 계정으로 바로 체험할 수 있습니다.
+        </div>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {error && (
+          {error ? (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-          )}
+          ) : null}
 
           <div className="space-y-2">
             <Label htmlFor="email">이메일</Label>
@@ -73,7 +88,7 @@ export default function LoginForm() {
               id="email"
               name="email"
               type="email"
-              placeholder="example@email.com"
+              placeholder="parent@example.com"
               value={formData.email}
               onChange={handleChange}
               required
@@ -92,14 +107,14 @@ export default function LoginForm() {
             />
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          <Button type="submit" className="w-full" disabled={loading}>
+        <CardFooter className="flex flex-col space-y-3">
+          <Button type="submit" size="lg" className="w-full" disabled={loading}>
             {loading ? '로그인 중...' : '로그인'}
           </Button>
-          <p className="text-sm text-center text-muted-foreground">
-            계정이 없으신가요?{' '}
-            <Link href="/signup" className="text-blue-600 hover:underline">
-              회원가입
+          <p className="text-center text-sm leading-6 text-muted-foreground">
+            아직 가족 계정이 없나요?{' '}
+            <Link href="/signup" className="font-medium text-primary hover:underline">
+              회원가입하기
             </Link>
           </p>
         </CardFooter>

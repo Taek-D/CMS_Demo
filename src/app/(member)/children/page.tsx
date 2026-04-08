@@ -52,9 +52,9 @@ export async function loadChildManagementData(
   }
 
   return {
-    children: (childrenResult.data ?? []) as ChildWithClass[],
-    centers: (centersResult.data ?? []) as ChildcareCenterSummary[],
-    classes: (classesResult.data ?? []) as ChildcareClassSummary[],
+    children: (childrenResult.data ?? []) as unknown as ChildWithClass[],
+    centers: (centersResult.data ?? []) as unknown as ChildcareCenterSummary[],
+    classes: (classesResult.data ?? []) as unknown as ChildcareClassSummary[],
   };
 }
 

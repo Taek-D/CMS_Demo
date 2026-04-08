@@ -1,37 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAdminAccess } from '@/lib/admin-auth';
 import { createServiceClient } from '@/lib/supabase/server';
+import { getErrorMessage } from '@/lib/utils';
+import type { BankAccount, BillingResult, BillingSchedule } from '@/types/database';
 
-const FAIL_REASONS = ['잔액부족', '계좌오류', '한도초과', '정지계좌'];
+const FAIL_REASONS = [
+  'Insufficient funds',
+  'Account error',
+  'Retry limit exceeded',
+  'Dormant account',
+] as const;
+
+type BillingScheduleWithAccount = BillingSchedule & {
+  cms_bank_accounts: Pick<BankAccount, 'id' | 'member_id' | 'consent_status'>;
+};
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createServiceClient();
-    const body = await request.json();
-    const { batch_month } = body;
+    const adminAccess = await getAdminAccess();
 
-    if (!batch_month) {
+    if (adminAccess.kind !== 'ok') {
+      return NextResponse.json(
+        { error: 'Admin access is required.' },
+        { status: adminAccess.kind === 'unauthenticated' ? 401 : 403 }
+      );
+    }
+
+    const supabase = await createServiceClient();
+    const body = (await request.json()) as { batch_month?: string };
+    const batchMonth = body.batch_month?.trim();
+
+    if (!batchMonth) {
       return NextResponse.json(
         { error: 'batch_month is required' },
         { status: 400 }
       );
     }
 
-    // 해당 월 배치가 이미 존재하는지 확인
     const { data: existingBatch } = await supabase
       .from('cms_billing_batches')
       .select('id')
-      .eq('batch_month', batch_month)
-      .single();
+      .eq('batch_month', batchMonth)
+      .maybeSingle();
 
     if (existingBatch) {
       return NextResponse.json(
-        { error: `이미 ${batch_month} 월 배치가 존재합니다.` },
+        { error: `A batch for ${batchMonth} already exists.` },
         { status: 400 }
       );
     }
 
-    // 출금 대상 조회 (동의 완료 + 활성화된 스케줄)
-    const { data: schedules, error: schedulesError } = await supabase
+    const { data: schedulesData, error: schedulesError } = await supabase
       .from('cms_billing_schedules')
       .select(`
         *,
@@ -51,40 +70,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!schedules || schedules.length === 0) {
+    const schedules = (schedulesData as BillingScheduleWithAccount[] | null) ?? [];
+
+    if (schedules.length === 0) {
       return NextResponse.json(
-        { error: '출금 대상이 없습니다. 출금 동의가 완료된 스케줄을 확인해주세요.' },
+        { error: 'No active consented schedules were found.' },
         { status: 400 }
       );
     }
 
-    // 배치 생성
     const { data: batch, error: batchError } = await supabase
       .from('cms_billing_batches')
       .insert({
-        batch_month,
+        batch_month: batchMonth,
         status: 'processing',
       })
       .select()
       .single();
 
-    if (batchError || !batch) {
+    if (batchError) {
+      const isDuplicateBatch = batchError.code === '23505';
+
       return NextResponse.json(
-        { error: batchError?.message || '배치 생성 실패' },
+        {
+          error: isDuplicateBatch
+            ? `A batch for ${batchMonth} already exists.`
+            : batchError.message,
+        },
+        { status: isDuplicateBatch ? 400 : 500 }
+      );
+    }
+
+    if (!batch) {
+      return NextResponse.json(
+        { error: 'Failed to create billing batch.' },
         { status: 500 }
       );
     }
 
-    // 각 스케줄별 결과 생성 및 시뮬레이션
     let successCount = 0;
     let failCount = 0;
-    const results = [];
+    const results: BillingResult[] = [];
 
     for (const schedule of schedules) {
-      const account = (schedule as any).cms_bank_accounts;
-      const isSuccess = Math.random() < 0.85; // 85% 성공률
+      const account = schedule.cms_bank_accounts;
+      const isSuccess = Math.random() < 0.85;
       const status = isSuccess ? 'success' : 'failed';
-      const failReason = isSuccess ? null : FAIL_REASONS[Math.floor(Math.random() * FAIL_REASONS.length)];
+      const failReason = isSuccess
+        ? null
+        : FAIL_REASONS[Math.floor(Math.random() * FAIL_REASONS.length)];
       const processedAt = new Date().toISOString();
 
       const { data: result, error: resultError } = await supabase
@@ -106,7 +140,9 @@ export async function POST(request: NextRequest) {
         continue;
       }
 
-      results.push(result);
+      if (result) {
+        results.push(result as BillingResult);
+      }
 
       if (isSuccess) {
         successCount++;
@@ -115,7 +151,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 배치 집계 업데이트
     const { error: updateError } = await supabase
       .from('cms_billing_batches')
       .update({
@@ -136,10 +171,11 @@ export async function POST(request: NextRequest) {
       success: successCount,
       failed: failCount,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Billing run error:', error);
+
     return NextResponse.json(
-      { error: error.message || '출금 실행 중 오류가 발생했습니다.' },
+      { error: getErrorMessage(error, 'Failed to run billing batch.') },
       { status: 500 }
     );
   }

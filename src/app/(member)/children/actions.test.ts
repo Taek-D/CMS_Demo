@@ -156,18 +156,18 @@ describe('loadChildManagementData', () => {
         id: 'child-1',
         parent_member_id: 'parent-1',
         class_id: 'class-1',
-        name: 'Minji',
+        name: '민지',
         birth_date: null,
         created_at: '2026-04-07T00:00:00Z',
         updated_at: '2026-04-07T00:00:00Z',
         cms_childcare_classes: {
           id: 'class-1',
           center_id: 'center-1',
-          name: 'Sun Class',
+          name: '해님반',
           created_at: '2026-04-07T00:00:00Z',
           cms_childcare_centers: {
             id: 'center-1',
-            name: 'Morning Star Childcare',
+            name: '별꽃 어린이집',
             created_at: '2026-04-07T00:00:00Z',
           },
         },
@@ -176,7 +176,7 @@ describe('loadChildManagementData', () => {
     const centers = [
       {
         id: 'center-1',
-        name: 'Morning Star Childcare',
+        name: '별꽃 어린이집',
         created_at: '2026-04-07T00:00:00Z',
       },
     ];
@@ -184,7 +184,7 @@ describe('loadChildManagementData', () => {
       {
         id: 'class-1',
         center_id: 'center-1',
-        name: 'Sun Class',
+        name: '해님반',
         created_at: '2026-04-07T00:00:00Z',
       },
     ];

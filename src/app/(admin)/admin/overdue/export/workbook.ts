@@ -32,7 +32,9 @@ function slugifyScopePart(value: string) {
   return value
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[\\/:*?"<>|]+/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
 
@@ -51,26 +53,26 @@ function toWorkbookRow(row: OverdueRow): OverdueWorkbookRow {
     classNames: row.classNames,
     batchMonth: row.batchMonth,
     amount: row.amount,
-    status: row.status,
+    status: row.status === 'failed' ? '실패' : row.status === 'success' ? '성공' : row.status === 'pending' ? '대기 중' : row.status,
     failReason: row.failReason,
   };
 }
 
 export const OVERDUE_EXPORT_COLUMNS: OverdueWorkbookColumn[] = [
-  { header: 'Member No.', key: 'memberNo', width: 18 },
-  { header: 'Parent', key: 'parentName', width: 20 },
-  { header: 'Children', key: 'childNames', width: 28 },
-  { header: 'Childcare Center', key: 'centerNames', width: 28 },
-  { header: 'Class', key: 'classNames', width: 20 },
-  { header: 'Batch Month', key: 'batchMonth', width: 14 },
-  { header: 'Amount', key: 'amount', width: 14 },
-  { header: 'Billing Status', key: 'status', width: 16 },
-  { header: 'Fail Reason', key: 'failReason', width: 24 },
+  { header: '회원번호', key: 'memberNo', width: 18 },
+  { header: '학부모', key: 'parentName', width: 20 },
+  { header: '자녀', key: 'childNames', width: 28 },
+  { header: '어린이집', key: 'centerNames', width: 28 },
+  { header: '반', key: 'classNames', width: 20 },
+  { header: '배치 월', key: 'batchMonth', width: 14 },
+  { header: '금액', key: 'amount', width: 14 },
+  { header: '결제 상태', key: 'status', width: 16 },
+  { header: '실패 사유', key: 'failReason', width: 24 },
 ];
 
 export async function buildOverdueWorkbook(rows: OverdueRow[]) {
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Overdue Statement');
+  const worksheet = workbook.addWorksheet('미납 명세표');
 
   worksheet.columns = OVERDUE_EXPORT_COLUMNS;
   worksheet.addRows(rows.map(toWorkbookRow));
@@ -87,5 +89,5 @@ export async function buildOverdueWorkbook(rows: OverdueRow[]) {
 export function buildOverdueFilename(scope: ExportScope) {
   assertExplicitScope(scope);
 
-  return `overdue-statement-${slugifyScopePart(scope.month)}-${slugifyScopePart(scope.center)}-${slugifyScopePart(scope.class)}.xlsx`;
+  return `미납명세표-${slugifyScopePart(scope.month)}-${slugifyScopePart(scope.center)}-${slugifyScopePart(scope.class)}.xlsx`;
 }

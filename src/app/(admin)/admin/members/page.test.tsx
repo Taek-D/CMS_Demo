@@ -87,9 +87,9 @@ describe('buildMembersSelect', () => {
 
   it('uses inner joins only when related filters are active', () => {
     expect(buildMembersSelect({})).not.toContain('!inner');
-    expect(buildMembersSelect({ child: 'Minji' })).toContain('children:cms_children!inner');
-    expect(buildMembersSelect({ class: 'Sun' })).toContain('class:cms_childcare_classes!inner');
-    expect(buildMembersSelect({ center: 'Morning' })).toContain('center:cms_childcare_centers!inner');
+    expect(buildMembersSelect({ child: '민지' })).toContain('children:cms_children!inner');
+    expect(buildMembersSelect({ class: '해님' })).toContain('class:cms_childcare_classes!inner');
+    expect(buildMembersSelect({ center: '별꽃' })).toContain('center:cms_childcare_centers!inner');
   });
 });
 
@@ -98,27 +98,27 @@ describe('applyMemberFilters', () => {
     const query = createQueryMock();
 
     applyMemberFilters(query, {
-      child: 'Minji',
-      center: 'Morning Star',
-      class: 'Sun',
+      child: '민지',
+      center: '별꽃',
+      class: '해님',
     });
 
-    expect(query.ilike).toHaveBeenCalledWith('children.name', '%Minji%');
-    expect(query.ilike).toHaveBeenCalledWith('children.class.center.name', '%Morning Star%');
-    expect(query.ilike).toHaveBeenCalledWith('children.class.name', '%Sun%');
+    expect(query.ilike).toHaveBeenCalledWith('children.name', '%민지%');
+    expect(query.ilike).toHaveBeenCalledWith('children.class.center.name', '%별꽃%');
+    expect(query.ilike).toHaveBeenCalledWith('children.class.name', '%해님%');
   });
 
   it('keeps parent-name filtering alongside relation filters', () => {
     const query = createQueryMock();
     const filters: MembersSearchParams = {
-      parent: 'Kim',
-      child: 'Minji',
+      parent: '김',
+      child: '민지',
     };
 
     applyMemberFilters(query, filters);
 
-    expect(query.or).toHaveBeenCalledWith('name.ilike.%Kim%,email.ilike.%Kim%');
-    expect(query.ilike).toHaveBeenCalledWith('children.name', '%Minji%');
+    expect(query.or).toHaveBeenCalledWith('name.ilike.%김%,email.ilike.%김%');
+    expect(query.ilike).toHaveBeenCalledWith('children.name', '%민지%');
   });
 });
 
@@ -131,7 +131,7 @@ describe('MembersPage CRM rendering', () => {
     });
 
     const view = await MembersPage({
-      searchParams: Promise.resolve({ parent: 'Kim', child: 'Minji', center: 'Morning', class: 'Sun' }),
+      searchParams: Promise.resolve({ parent: '김', child: '민지', center: '별꽃', class: '해님' }),
     });
     const { container } = render(view);
 
@@ -146,7 +146,7 @@ describe('MembersPage CRM rendering', () => {
       {
         id: 'member-1',
         member_no: 'MEM-001',
-        name: 'Kim Parent',
+        name: '김학부모',
         email: 'kim@example.com',
         created_at: '2026-04-08T00:00:00.000Z',
         cms_bank_accounts: [
@@ -154,7 +154,7 @@ describe('MembersPage CRM rendering', () => {
             id: 'account-1',
             bank_code: '004',
             account_number_enc: '1111222233334444',
-            account_holder: 'Kim Parent',
+            account_holder: '김학부모',
             consent_status: 'consented',
             consented_at: '2026-04-08T00:00:00.000Z',
           },
@@ -162,25 +162,25 @@ describe('MembersPage CRM rendering', () => {
         children: [
           {
             id: 'child-1',
-            name: 'Minji',
+            name: '민지',
             class: {
               id: 'class-1',
-              name: 'Sun Class',
+              name: '해님반',
               center: {
                 id: 'center-1',
-                name: 'Morning Star Childcare',
+                name: '별꽃 어린이집',
               },
             },
           },
           {
             id: 'child-2',
-            name: 'Jiyoon',
+            name: '지윤',
             class: {
               id: 'class-2',
-              name: 'Moon Class',
+              name: '달님반',
               center: {
                 id: 'center-1',
-                name: 'Morning Star Childcare',
+                name: '별꽃 어린이집',
               },
             },
           },
@@ -198,15 +198,15 @@ describe('MembersPage CRM rendering', () => {
 
     render(view);
 
-    expect(screen.getByRole('columnheader', { name: 'Child Count' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Children' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Centers' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Classes' })).toBeTruthy();
-    expect(screen.getByText('Minji, Jiyoon')).toBeTruthy();
-    expect(screen.getByText('Morning Star Childcare')).toBeTruthy();
-    expect(screen.getByText('Sun Class, Moon Class')).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '자녀 수' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '자녀 이름' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '어린이집' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '반' })).toBeTruthy();
+    expect(screen.getByText('민지, 지윤')).toBeTruthy();
+    expect(screen.getByText('별꽃 어린이집')).toBeTruthy();
+    expect(screen.getByText('해님반, 달님반')).toBeTruthy();
     expect(screen.getByText('MASKED:1111222233334444')).toBeTruthy();
-    expect(screen.getByText('Consented')).toBeTruthy();
+    expect(screen.getByText('동의 완료')).toBeTruthy();
   });
 
   it('keeps the empty-state message when no members match the filters', async () => {
@@ -217,11 +217,11 @@ describe('MembersPage CRM rendering', () => {
     });
 
     const view = await MembersPage({
-      searchParams: Promise.resolve({ parent: 'Nobody' }),
+      searchParams: Promise.resolve({ parent: '아무개' }),
     });
 
     render(view);
 
-    expect(screen.getByText('No members match the current filters.')).toBeTruthy();
+    expect(screen.getByText('현재 필터에 맞는 회원이 없습니다.')).toBeTruthy();
   });
 });

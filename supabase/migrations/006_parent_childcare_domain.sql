@@ -28,14 +28,14 @@ create table cms_children (
 
 insert into cms_childcare_centers (id, name)
 values
-  ('11111111-1111-1111-1111-111111111111', 'Morning Star Childcare'),
-  ('22222222-2222-2222-2222-222222222222', 'River Kids Center');
+  ('11111111-1111-1111-1111-111111111111', '별꽃 어린이집'),
+  ('22222222-2222-2222-2222-222222222222', '강변 키즈 어린이집');
 
 insert into cms_childcare_classes (id, center_id, name)
 values
-  ('11111111-aaaa-1111-aaaa-111111111111', '11111111-1111-1111-1111-111111111111', 'Sun Class'),
-  ('11111111-bbbb-1111-bbbb-111111111111', '11111111-1111-1111-1111-111111111111', 'Moon Class'),
-  ('22222222-aaaa-2222-aaaa-222222222222', '22222222-2222-2222-2222-222222222222', 'Star Class');
+  ('11111111-aaaa-1111-aaaa-111111111111', '11111111-1111-1111-1111-111111111111', '해님반'),
+  ('11111111-bbbb-1111-bbbb-111111111111', '11111111-1111-1111-1111-111111111111', '달님반'),
+  ('22222222-aaaa-2222-aaaa-222222222222', '22222222-2222-2222-2222-222222222222', '별님반');
 
 create index idx_cms_childcare_centers_name on cms_childcare_centers(lower(name));
 create index idx_cms_childcare_classes_center_id on cms_childcare_classes(center_id);

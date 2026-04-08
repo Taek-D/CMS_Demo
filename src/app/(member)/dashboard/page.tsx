@@ -1,6 +1,13 @@
 import Link from 'next/link';
+import {
+  ArrowUpRight,
+  BadgeCheck,
+  CalendarClock,
+  HeartHandshake,
+  UsersRound,
+  Wallet,
+} from 'lucide-react';
 
-import { requireAuth } from '@/lib/auth';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,12 +17,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { requireAuth } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 
 export function buildDashboardChildrenSummary(count: number) {
   return {
-    title: 'Children',
-    description: 'Manage children linked to your member account.',
+    title: '자녀 관리',
+    description: '멤버 계정에 연결된 자녀 정보를 관리합니다.',
     href: '/children',
     count,
   };
@@ -24,26 +32,26 @@ export function buildDashboardChildrenSummary(count: number) {
 function getStatusBadge(status: string) {
   switch (status) {
     case 'consented':
-      return <Badge className="bg-green-500">Consented</Badge>;
+      return <Badge className="border-transparent bg-secondary text-secondary-foreground">동의 완료</Badge>;
     case 'pending':
-      return <Badge className="bg-yellow-500 text-black">Pending</Badge>;
+      return <Badge className="border-transparent bg-accent text-accent-foreground">미동의</Badge>;
     case 'revoked':
-      return <Badge variant="outline">Revoked</Badge>;
+      return <Badge variant="outline">철회됨</Badge>;
     default:
-      return <Badge variant="outline">Unknown</Badge>;
+      return <Badge variant="outline">상태 없음</Badge>;
   }
 }
 
 function getPaymentStatusBadge(status: string) {
   switch (status) {
     case 'success':
-      return <Badge className="bg-green-500">Success</Badge>;
+      return <Badge className="border-transparent bg-secondary text-secondary-foreground">성공</Badge>;
     case 'failed':
-      return <Badge variant="destructive">Failed</Badge>;
+      return <Badge variant="destructive">실패</Badge>;
     case 'pending':
-      return <Badge className="bg-blue-500">Pending</Badge>;
+      return <Badge className="border-transparent bg-primary/10 text-primary">대기</Badge>;
     default:
-      return <Badge variant="outline">Unknown</Badge>;
+      return <Badge variant="outline">알 수 없음</Badge>;
   }
 }
 
@@ -72,134 +80,204 @@ export default async function DashboardPage() {
   );
   const account = accounts[0];
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          {member?.name ?? 'Member'} Dashboard
-        </h1>
-        <p className="mt-1 text-gray-600">Member No: {member?.member_no ?? '-'}</p>
-      </div>
+  const summaryTiles = [
+    {
+      label: '등록된 자녀 수',
+      value: String(childrenSummary.count),
+      icon: UsersRound,
+    },
+    {
+      label: '자동이체 동의 상태',
+      value: account?.consent_status
+        ? account.consent_status === 'consented'
+          ? '동의 완료'
+          : account.consent_status === 'pending'
+            ? '미동의'
+            : '철회됨'
+        : '미등록',
+      icon: HeartHandshake,
+    },
+    {
+      label: '최근 결제 기준일',
+      value: recentPayments[0]?.created_at
+        ? new Date(recentPayments[0].created_at).toLocaleDateString('ko-KR')
+        : '내역 없음',
+      icon: CalendarClock,
+    },
+  ];
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Status</CardTitle>
-            <CardDescription>Current billing account and consent status.</CardDescription>
+  const quickActions = [
+    {
+      href: '/children',
+      title: '자녀 정보 관리',
+      copy: '자녀를 등록하거나 반 배정을 바꾸고, 기존 프로필을 수정할 수 있습니다.',
+    },
+    {
+      href: '/account',
+      title: '출금 계좌 확인',
+      copy: '예금주 정보와 현재 등록된 결제 계좌 상태를 확인합니다.',
+    },
+    {
+      href: '/payments',
+      title: '결제 이력 열기',
+      copy: '최근 결제 결과를 따로 헤매지 않고 바로 확인할 수 있습니다.',
+    },
+  ];
+
+  return (
+    <div className="shell-frame px-4 pb-8 sm:px-6 lg:px-8">
+      <section className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_22rem]">
+        <Card className="border-border/70">
+          <CardHeader className="space-y-4">
+            <span className="section-eyebrow">멤버 요약</span>
+            <div className="space-y-3">
+              <CardTitle className="text-[2rem] sm:text-[2.4rem]">
+                {member?.name ?? '멤버'}님 가족 대시보드
+              </CardTitle>
+              <CardDescription className="max-w-2xl text-sm leading-7 sm:text-base">
+                자녀 등록, 자동이체 동의, 결제 기록을 한 화면에서 자연스럽게
+                확인할 수 있도록 정리한 학부모 중심 요약 화면입니다.
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid gap-4 sm:grid-cols-3">
+            {summaryTiles.map((tile) => {
+              const Icon = tile.icon;
+
+              return (
+                <div key={tile.label} className="metric-tile">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-muted-foreground">{tile.label}</p>
+                    <Icon className="size-4 text-primary" />
+                  </div>
+                  <p className="data-value mt-6 text-[2.2rem] sm:text-[2.5rem]">
+                    {tile.value}
+                  </p>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/70">
+          <CardHeader>
+            <CardTitle>계좌 상태 요약</CardTitle>
+            <CardDescription>
+              현재 연결된 출금 계좌의 핵심 정보만 빠르게 확인합니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             {account ? (
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-600">Bank</p>
-                  <p className="font-medium">{account.bank_code}</p>
+              <>
+                <div className="rounded-[1.35rem] border border-border/70 bg-[color:var(--surface-strong)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    예금주
+                  </p>
+                  <p className="mt-2 text-lg font-medium text-[color:var(--brand-ink)]">
+                    {account.account_holder}
+                  </p>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Account Holder</p>
-                  <p className="font-medium">{account.account_holder}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Consent</p>
-                  <div className="mt-1">{getStatusBadge(account.consent_status)}</div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm text-muted-foreground">동의 상태</span>
+                  {getStatusBadge(account.consent_status)}
                 </div>
                 <Link href="/account">
-                  <Button variant="outline" className="mt-2 w-full">
-                    Manage account
+                  <Button variant="outline" size="lg" className="w-full">
+                    <Wallet className="size-4" />
+                    계좌 관리 열기
                   </Button>
                 </Link>
-              </div>
+              </>
             ) : (
-              <div className="space-y-3 text-center">
-                <p className="text-sm text-gray-500">No account has been registered yet.</p>
-                <Link href="/account">
-                  <Button className="w-full">Register account</Button>
+              <div className="rounded-[1.5rem] border border-dashed border-border px-5 py-6 text-center">
+                <p className="text-sm leading-7 text-muted-foreground">
+                  아직 결제 계좌가 등록되지 않았습니다.
+                </p>
+                <Link href="/account" className="mt-4 inline-flex w-full">
+                  <Button size="lg" className="w-full">
+                    계좌 등록하기
+                  </Button>
                 </Link>
               </div>
             )}
           </CardContent>
         </Card>
+      </section>
 
-        <Card>
+      <section className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
+        <Card className="border-border/70">
           <CardHeader>
-            <CardTitle>{childrenSummary.title}</CardTitle>
-            <CardDescription>{childrenSummary.description}</CardDescription>
+            <CardTitle>다음으로 많이 하는 작업</CardTitle>
+            <CardDescription>
+              멤버가 자주 찾는 화면을 자연스럽게 이어주는 빠른 이동 영역입니다.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border border-dashed border-gray-300 p-4">
-              <p className="text-sm text-gray-600">Registered children</p>
-              <p className="mt-1 text-3xl font-semibold text-gray-900">
-                {childrenSummary.count}
-              </p>
-            </div>
-            <Link
-              href="/children"
-              className="inline-flex w-full items-center justify-center rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
-            >
-              Manage children
-            </Link>
+          <CardContent className="grid gap-3">
+            {quickActions.map((action) => (
+              <Link
+                key={action.href}
+                href={action.href}
+                className="group rounded-[1.5rem] border border-border/70 bg-[color:var(--surface-strong)] px-5 py-5 transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-2">
+                    <p className="text-base font-medium text-[color:var(--brand-ink)]">
+                      {action.title}
+                    </p>
+                    <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                      {action.copy}
+                    </p>
+                  </div>
+                  <ArrowUpRight className="mt-1 size-4 text-primary transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </div>
+              </Link>
+            ))}
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/70">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Open common member tasks.</CardDescription>
+            <CardTitle>최근 결제 이력</CardTitle>
+            <CardDescription>
+              멤버 번호에 연결된 최근 다섯 건의 결제 결과를 보여줍니다.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <Link href="/account">
-              <Button variant="outline" className="w-full">
-                Manage account
-              </Button>
-            </Link>
-            <Link href="/consent">
-              <Button variant="outline" className="w-full">
-                Manage consent
-              </Button>
-            </Link>
-            <Link href="/payments">
-              <Button variant="outline" className="w-full">
-                View payments
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2 lg:col-span-1">
-          <CardHeader>
-            <CardTitle>Recent Payments</CardTitle>
-            <CardDescription>Latest five billing results.</CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             {recentPayments.length > 0 ? (
-              <div className="space-y-3">
+              <>
                 {recentPayments.map((payment) => (
                   <div
                     key={payment.id}
-                    className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                    className="rounded-[1.35rem] border border-border/70 bg-[color:var(--surface-strong)] px-4 py-4"
                   >
-                    <div>
-                      <p className="font-medium">
-                        {new Date(payment.created_at).toLocaleDateString('ko-KR')}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {payment.amount.toLocaleString()} KRW
-                      </p>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <p className="font-medium text-[color:var(--brand-ink)]">
+                          {new Date(payment.created_at).toLocaleDateString('ko-KR')}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {payment.amount.toLocaleString()}원
+                        </p>
+                      </div>
+                      {getPaymentStatusBadge(payment.status)}
                     </div>
-                    {getPaymentStatusBadge(payment.status)}
                   </div>
                 ))}
                 <Link href="/payments">
-                  <Button variant="link" className="w-full">
-                    View all payments
+                  <Button variant="outline" size="lg" className="w-full">
+                    <BadgeCheck className="size-4" />
+                    전체 결제 내역 보기
                   </Button>
                 </Link>
-              </div>
+              </>
             ) : (
-              <p className="py-4 text-center text-gray-500">No payment history yet.</p>
+              <div className="rounded-[1.5rem] border border-dashed border-border px-5 py-6 text-center text-sm leading-7 text-muted-foreground">
+                아직 기록된 결제 내역이 없습니다.
+              </div>
             )}
           </CardContent>
         </Card>
-      </div>
+      </section>
     </div>
   );
 }

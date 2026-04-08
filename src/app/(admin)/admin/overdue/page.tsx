@@ -47,13 +47,13 @@ function toQueryString(params: OverdueSearchParams) {
 function getStatusBadge(row: OverdueRow) {
   switch (row.status) {
     case 'failed':
-      return <Badge variant="destructive">Failed</Badge>;
+      return <Badge variant="destructive">실패</Badge>;
     case 'success':
-      return <Badge className="bg-green-600">Success</Badge>;
+      return <Badge className="bg-green-600">성공</Badge>;
     case 'pending':
       return (
         <Badge variant="secondary" className="bg-yellow-500 text-black">
-          Pending
+          대기 중
         </Badge>
       );
     default:
@@ -78,7 +78,7 @@ export default async function OverduePage({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">Overdue Management</h1>
+      <h1 className="mb-8 text-3xl font-bold text-gray-900">미납 관리</h1>
 
       <Card className="mb-6">
         <CardContent className="pt-6">
@@ -86,7 +86,7 @@ export default async function OverduePage({
             <input
               type="month"
               name="month"
-              aria-label="Batch month"
+              aria-label="배치 월"
               data-testid="admin-overdue-month-filter"
               defaultValue={filters.month}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -94,40 +94,40 @@ export default async function OverduePage({
             <input
               type="text"
               name="center"
-              aria-label="Childcare center"
+              aria-label="어린이집"
               data-testid="admin-overdue-center-filter"
-              placeholder="Childcare center"
+              placeholder="어린이집 이름"
               defaultValue={filters.center}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <input
               type="text"
               name="class"
-              aria-label="Class"
+              aria-label="반"
               data-testid="admin-overdue-class-filter"
-              placeholder="Class name"
+              placeholder="반 이름"
               defaultValue={filters.class}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
             <select
               name="status"
-              aria-label="Billing status"
+              aria-label="결제 상태"
               data-testid="admin-overdue-status-filter"
               defaultValue={filters.status}
               className="rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="failed">Failed</option>
-              <option value="pending">Pending</option>
-              <option value="success">Success</option>
-              <option value="all">All statuses</option>
+              <option value="failed">실패</option>
+              <option value="pending">대기 중</option>
+              <option value="success">성공</option>
+              <option value="all">전체 상태</option>
             </select>
             <div className="flex gap-2 md:col-span-1">
               <input
                 type="text"
                 name="search"
-                aria-label="Parent or child search"
+                aria-label="학부모 또는 자녀 검색"
                 data-testid="admin-overdue-search-filter"
-                placeholder="Parent or child"
+                placeholder="학부모 또는 자녀"
                 defaultValue={filters.search}
                 className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -136,7 +136,7 @@ export default async function OverduePage({
                 data-testid="admin-overdue-submit"
                 className="rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
               >
-                Search
+                조회
               </button>
             </div>
           </form>
@@ -148,14 +148,14 @@ export default async function OverduePage({
                 data-testid="admin-overdue-export-link"
                 className="rounded-md border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100"
               >
-                Export statement
+                거래명세표 다운로드
               </a>
             ) : (
               <p
                 data-testid="admin-overdue-export-hint"
                 className="text-sm text-gray-500"
               >
-                Select month, childcare center, and class to enable statement export.
+                월, 어린이집, 반을 모두 선택하면 거래명세표를 내려받을 수 있습니다.
               </p>
             )}
           </div>
@@ -167,15 +167,15 @@ export default async function OverduePage({
           <Table data-testid="admin-overdue-table">
             <TableHeader>
               <TableRow>
-                <TableHead>Member No.</TableHead>
-                <TableHead>Parent</TableHead>
-                <TableHead>Children</TableHead>
-                <TableHead>Childcare Center</TableHead>
-                <TableHead>Class</TableHead>
-                <TableHead>Batch Month</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Billing Status</TableHead>
-                <TableHead>Fail Reason</TableHead>
+                <TableHead>회원번호</TableHead>
+                <TableHead>학부모</TableHead>
+                <TableHead>자녀</TableHead>
+                <TableHead>어린이집</TableHead>
+                <TableHead>반</TableHead>
+                <TableHead>배치 월</TableHead>
+                <TableHead>금액</TableHead>
+                <TableHead>결제 상태</TableHead>
+                <TableHead>실패 사유</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -197,7 +197,7 @@ export default async function OverduePage({
 
           {rows.length === 0 && (
             <div className="py-12 text-center text-gray-500">
-              No overdue rows match the current filters.
+              현재 필터에 맞는 미납 내역이 없습니다.
             </div>
           )}
         </CardContent>

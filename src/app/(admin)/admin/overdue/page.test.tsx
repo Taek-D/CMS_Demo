@@ -80,17 +80,17 @@ describe('normalizeOverdueFilters', () => {
     expect(
       normalizeOverdueFilters({
         month: ['2026-04'],
-        center: ['Morning Star Childcare'],
-        class: ['Sun Class'],
+        center: ['별꽃 어린이집'],
+        class: ['해님반'],
         status: ['all'],
-        search: ['Minji'],
+        search: ['민지'],
       })
     ).toEqual({
       month: '2026-04',
-      center: 'Morning Star Childcare',
-      class: 'Sun Class',
+      center: '별꽃 어린이집',
+      class: '해님반',
       status: 'all',
-      search: 'Minji',
+      search: '민지',
     });
   });
 });
@@ -107,8 +107,8 @@ describe('buildOverdueSelect', () => {
 
   it('uses conditional !inner joins when center or class filters are active', () => {
     const select = buildOverdueSelect({
-      center: 'Morning Star Childcare',
-      class: 'Sun Class',
+      center: '별꽃 어린이집',
+      class: '해님반',
     });
 
     expect(select).toContain('children:cms_children!inner');
@@ -124,17 +124,17 @@ describe('applyOverdueFilters', () => {
     applyOverdueFilters(query, {
       month: '2026-04',
       status: 'failed',
-      center: 'Morning Star Childcare',
-      class: 'Sun Class',
+      center: '별꽃 어린이집',
+      class: '해님반',
     });
 
     expect(query.eq).toHaveBeenCalledWith('batch.batch_month', '2026-04');
     expect(query.eq).toHaveBeenCalledWith('status', 'failed');
     expect(query.ilike).toHaveBeenCalledWith(
       'member.children.class.center.name',
-      '%Morning Star Childcare%'
+      '%별꽃 어린이집%'
     );
-    expect(query.ilike).toHaveBeenCalledWith('member.children.class.name', '%Sun Class%');
+    expect(query.ilike).toHaveBeenCalledWith('member.children.class.name', '%해님반%');
   });
 
   it('skips billing-status SQL narrowing when all statuses are requested', () => {
@@ -157,7 +157,7 @@ describe('toOverdueRow', () => {
       account_id: 'account-1',
       amount: 55000,
       status: 'failed',
-      fail_reason: 'Insufficient funds',
+      fail_reason: '잔액 부족',
       processed_at: '2026-04-08T00:00:00.000Z',
       created_at: '2026-04-08T00:00:00.000Z',
       batch: {
@@ -167,30 +167,30 @@ describe('toOverdueRow', () => {
       member: {
         id: 'member-1',
         member_no: 'MEM-001',
-        name: 'Kim Parent',
+        name: '김학부모',
         email: 'kim@example.com',
         children: [
           {
             id: 'child-1',
-            name: 'Minji',
+            name: '민지',
             class: {
               id: 'class-1',
-              name: 'Sun Class',
+              name: '해님반',
               center: {
                 id: 'center-1',
-                name: 'Morning Star Childcare',
+                name: '별꽃 어린이집',
               },
             },
           },
           {
             id: 'child-2',
-            name: 'Jiyoon',
+            name: '지윤',
             class: {
               id: 'class-2',
-              name: 'Moon Class',
+              name: '달님반',
               center: {
                 id: 'center-1',
-                name: 'Morning Star Childcare',
+                name: '별꽃 어린이집',
               },
             },
           },
@@ -198,9 +198,9 @@ describe('toOverdueRow', () => {
       },
     });
 
-    expect(row.childNames).toBe('Minji, Jiyoon');
-    expect(row.centerNames).toBe('Morning Star Childcare');
-    expect(row.classNames).toBe('Sun Class, Moon Class');
+    expect(row.childNames).toBe('민지, 지윤');
+    expect(row.centerNames).toBe('별꽃 어린이집');
+    expect(row.classNames).toBe('해님반, 달님반');
     expect(row.amount).toBe(55000);
     expect(row.id).toBe('result-1');
   });
@@ -216,7 +216,7 @@ describe('fetchOverdueRows', () => {
         account_id: 'account-1',
         amount: 55000,
         status: 'failed',
-        fail_reason: 'Insufficient funds',
+        fail_reason: '잔액 부족',
         processed_at: '2026-04-08T00:00:00.000Z',
         created_at: '2026-04-08T00:00:00.000Z',
         batch: {
@@ -226,18 +226,18 @@ describe('fetchOverdueRows', () => {
         member: {
           id: 'member-1',
           member_no: 'MEM-001',
-          name: 'Kim Parent',
+          name: '김학부모',
           email: 'kim@example.com',
           children: [
             {
               id: 'child-1',
-              name: 'Minji',
+              name: '민지',
               class: {
                 id: 'class-1',
-                name: 'Sun Class',
+                name: '해님반',
                 center: {
                   id: 'center-1',
-                  name: 'Morning Star Childcare',
+                  name: '별꽃 어린이집',
                 },
               },
             },
@@ -251,7 +251,7 @@ describe('fetchOverdueRows', () => {
         account_id: 'account-2',
         amount: 61000,
         status: 'failed',
-        fail_reason: 'Insufficient funds',
+        fail_reason: '잔액 부족',
         processed_at: '2026-04-08T00:00:00.000Z',
         created_at: '2026-04-08T00:00:00.000Z',
         batch: {
@@ -261,18 +261,18 @@ describe('fetchOverdueRows', () => {
         member: {
           id: 'member-2',
           member_no: 'MEM-002',
-          name: 'Park Parent',
+          name: '박학부모',
           email: 'park@example.com',
           children: [
             {
               id: 'child-2',
-              name: 'Jiyoon',
+              name: '지윤',
               class: {
                 id: 'class-1',
-                name: 'Sun Class',
+                name: '해님반',
                 center: {
                   id: 'center-1',
-                  name: 'Morning Star Childcare',
+                  name: '별꽃 어린이집',
                 },
               },
             },
@@ -287,21 +287,21 @@ describe('fetchOverdueRows', () => {
 
     const rows = await fetchOverdueRows({
       month: '2026-04',
-      center: 'Morning Star Childcare',
-      class: 'Sun Class',
-      search: 'Jiyoon',
+      center: '별꽃 어린이집',
+      class: '해님반',
+      search: '지윤',
     });
 
     expect(query.eq).toHaveBeenCalledWith('batch.batch_month', '2026-04');
     expect(query.eq).toHaveBeenCalledWith('status', 'failed');
     expect(query.ilike).toHaveBeenCalledWith(
       'member.children.class.center.name',
-      '%Morning Star Childcare%'
+      '%별꽃 어린이집%'
     );
-    expect(query.ilike).toHaveBeenCalledWith('member.children.class.name', '%Sun Class%');
+    expect(query.ilike).toHaveBeenCalledWith('member.children.class.name', '%해님반%');
     expect(rows).toHaveLength(1);
     expect(rows[0]?.memberNo).toBe('MEM-002');
-    expect(rows[0]?.childNames).toBe('Jiyoon');
+    expect(rows[0]?.childNames).toBe('지윤');
   });
 });
 
@@ -328,7 +328,7 @@ describe('OverduePage', () => {
     expect(screen.getByTestId('admin-overdue-search-filter')).toBeTruthy();
     expect(screen.getByTestId('admin-overdue-submit')).toBeTruthy();
     expect(screen.getByTestId('admin-overdue-export-hint').textContent).toContain(
-      'Select month, childcare center, and class to enable statement export.'
+      '월, 어린이집, 반을 모두 선택하면 거래명세표를 내려받을 수 있습니다.'
     );
     expect(screen.queryByTestId('admin-overdue-export-link')).toBeNull();
   });
@@ -342,7 +342,7 @@ describe('OverduePage', () => {
         account_id: 'account-1',
         amount: 55000,
         status: 'failed',
-        fail_reason: 'Insufficient funds',
+        fail_reason: '잔액 부족',
         processed_at: '2026-04-08T00:00:00.000Z',
         created_at: '2026-04-08T00:00:00.000Z',
         batch: {
@@ -352,18 +352,18 @@ describe('OverduePage', () => {
         member: {
           id: 'member-1',
           member_no: 'MEM-001',
-          name: 'Kim Parent',
+          name: '김학부모',
           email: 'kim@example.com',
           children: [
             {
               id: 'child-1',
-              name: 'Minji',
+              name: '민지',
               class: {
                 id: 'class-1',
-                name: 'Sun Class',
+                name: '해님반',
                 center: {
                   id: 'center-1',
-                  name: 'Morning Star Childcare',
+                  name: '별꽃 어린이집',
                 },
               },
             },
@@ -379,35 +379,35 @@ describe('OverduePage', () => {
     const view = await OverduePage({
       searchParams: Promise.resolve({
         month: '2026-04',
-        center: 'Morning Star Childcare',
-        class: 'Sun Class',
+        center: '별꽃 어린이집',
+        class: '해님반',
         status: 'failed',
-        search: 'Minji',
+        search: '민지',
       }),
     });
 
     render(view);
 
     expect(screen.getByTestId('admin-overdue-table')).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Member No.' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Parent' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Children' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Childcare Center' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Class' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Batch Month' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Amount' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Billing Status' })).toBeTruthy();
-    expect(screen.getByRole('columnheader', { name: 'Fail Reason' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '회원번호' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '학부모' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '자녀' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '어린이집' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '반' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '배치 월' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '금액' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '결제 상태' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: '실패 사유' })).toBeTruthy();
     expect(screen.getByText('MEM-001')).toBeTruthy();
-    expect(screen.getByText('Kim Parent')).toBeTruthy();
-    expect(screen.getByText('Minji')).toBeTruthy();
-    expect(screen.getByText('Morning Star Childcare')).toBeTruthy();
-    expect(screen.getByText('Sun Class')).toBeTruthy();
+    expect(screen.getByText('김학부모')).toBeTruthy();
+    expect(screen.getByText('민지')).toBeTruthy();
+    expect(screen.getByText('별꽃 어린이집')).toBeTruthy();
+    expect(screen.getByText('해님반')).toBeTruthy();
     expect(screen.getByText('55,000')).toBeTruthy();
-    expect(screen.getAllByText('Failed')).toHaveLength(2);
-    expect(screen.getByText('Insufficient funds')).toBeTruthy();
+    expect(screen.getAllByText('실패')).toHaveLength(2);
+    expect(screen.getByText('잔액 부족')).toBeTruthy();
     expect(screen.getByTestId('admin-overdue-export-link').getAttribute('href')).toBe(
-      '/admin/overdue/export?month=2026-04&center=Morning+Star+Childcare&class=Sun+Class&status=failed&search=Minji'
+      '/admin/overdue/export?month=2026-04&center=%EB%B3%84%EA%BD%83+%EC%96%B4%EB%A6%B0%EC%9D%B4%EC%A7%91&class=%ED%95%B4%EB%8B%98%EB%B0%98&status=failed&search=%EB%AF%BC%EC%A7%80'
     );
     expect(screen.queryByTestId('admin-overdue-export-hint')).toBeNull();
   });
@@ -427,6 +427,6 @@ describe('OverduePage', () => {
 
     render(view);
 
-    expect(screen.getByText('No overdue rows match the current filters.')).toBeTruthy();
+    expect(screen.getByText('현재 필터에 맞는 미납 내역이 없습니다.')).toBeTruthy();
   });
 });

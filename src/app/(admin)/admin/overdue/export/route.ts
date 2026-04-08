@@ -57,12 +57,14 @@ export async function GET(request: Request) {
     class: filters.class,
   });
   const buffer = await workbook.xlsx.writeBuffer();
+  const encodedFileName = encodeURIComponent(fileName);
+  const asciiFallbackName = `overdue-statement-${filters.month}.xlsx`;
 
   return new Response(buffer, {
     headers: {
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename=\"${fileName}\"`,
+      'Content-Disposition': `attachment; filename="${asciiFallbackName}"; filename*=UTF-8''${encodedFileName}`,
     },
   });
 }

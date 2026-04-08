@@ -37,25 +37,25 @@ const sampleRow: OverdueRow = {
   memberId: 'member-1',
   accountId: 'account-1',
   memberNo: 'MEM-202604-00001',
-  parentName: 'Kim Parent',
+  parentName: '김학부모',
   parentEmail: 'parent@example.com',
-  childNames: 'Han Child, Min Child',
-  centerNames: 'Morning Star Childcare',
-  classNames: 'Sun Class, Moon Class',
+  childNames: '한별, 민서',
+  centerNames: '별꽃 어린이집',
+  classNames: '해님반, 달님반',
   batchMonth: '2026-04',
   amount: 120000,
   status: 'failed',
-  failReason: 'Insufficient funds',
+  failReason: '잔액 부족',
   processedAt: '2026-04-01T09:00:00.000Z',
   createdAt: '2026-04-01T09:00:00.000Z',
 };
 
 const scopedFilters = {
   month: '2026-04',
-  center: 'Morning Star Childcare',
-  class: 'Sun Class',
+  center: '별꽃 어린이집',
+  class: '해님반',
   status: 'failed',
-  search: 'Kim',
+  search: '김',
 };
 
 beforeEach(() => {
@@ -76,7 +76,7 @@ describe('GET /admin/overdue/export workbook contract', () => {
 
     await loadedWorkbook.xlsx.load(buffer);
 
-    const worksheet = loadedWorkbook.getWorksheet('Overdue Statement');
+    const worksheet = loadedWorkbook.getWorksheet('미납 명세표');
     const headerRow = worksheet?.getRow(1).values;
 
     expect(headerRow).toEqual([
@@ -92,20 +92,20 @@ describe('GET /admin/overdue/export workbook contract', () => {
 
     await loadedWorkbook.xlsx.load(buffer);
 
-    const worksheet = loadedWorkbook.getWorksheet('Overdue Statement');
+    const worksheet = loadedWorkbook.getWorksheet('미납 명세표');
 
     expect(worksheet?.rowCount).toBe(2);
     expect(worksheet?.getRow(2).values).toEqual([
       undefined,
       'MEM-202604-00001',
-      'Kim Parent',
-      'Han Child, Min Child',
-      'Morning Star Childcare',
-      'Sun Class, Moon Class',
+      '김학부모',
+      '한별, 민서',
+      '별꽃 어린이집',
+      '해님반, 달님반',
       '2026-04',
       120000,
-      'failed',
-      'Insufficient funds',
+      '실패',
+      '잔액 부족',
     ]);
   });
 
@@ -113,10 +113,10 @@ describe('GET /admin/overdue/export workbook contract', () => {
     expect(
       buildOverdueFilename({
         month: '2026-04',
-        center: 'Morning Star Childcare',
-        class: 'Sun Class',
+        center: '별꽃 어린이집',
+        class: '해님반',
       })
-    ).toBe('overdue-statement-2026-04-morning-star-childcare-sun-class.xlsx');
+    ).toBe('미납명세표-2026-04-별꽃-어린이집-해님반.xlsx');
   });
 
   it('documents that month, center, and class are required for export.', () => {
@@ -124,7 +124,7 @@ describe('GET /admin/overdue/export workbook contract', () => {
       buildOverdueFilename({
         month: '2026-04',
         center: '',
-        class: 'Sun Class',
+        class: '해님반',
       })
     ).toThrowError('month, center, and class are required for export.');
   });
@@ -160,7 +160,7 @@ describe('GET /admin/overdue/export', () => {
     });
 
     const response = await GET(
-      new Request('https://example.com/admin/overdue/export?month=2026-04&class=Sun+Class')
+      new Request('https://example.com/admin/overdue/export?month=2026-04&class=%ED%95%B4%EB%8B%98%EB%B0%98')
     );
 
     expect(response.status).toBe(400);
@@ -175,31 +175,34 @@ describe('GET /admin/overdue/export', () => {
 
     const response = await GET(
       new Request(
-        'https://example.com/admin/overdue/export?month=2026-04&center=Morning+Star+Childcare&class=Sun+Class&status=failed&search=Kim'
+        'https://example.com/admin/overdue/export?month=2026-04&center=%EB%B3%84%EA%BD%83+%EC%96%B4%EB%A6%B0%EC%9D%B4%EC%A7%91&class=%ED%95%B4%EB%8B%98%EB%B0%98&status=failed&search=%EA%B9%80'
       )
     );
 
     expect(routeMocks.normalizeOverdueFilters).toHaveBeenCalledWith({
       month: ['2026-04'],
-      center: ['Morning Star Childcare'],
-      class: ['Sun Class'],
+      center: ['별꽃 어린이집'],
+      class: ['해님반'],
       status: ['failed'],
-      search: ['Kim'],
+      search: ['김'],
     });
     expect(routeMocks.fetchOverdueRows).toHaveBeenCalledWith({
       month: ['2026-04'],
-      center: ['Morning Star Childcare'],
-      class: ['Sun Class'],
+      center: ['별꽃 어린이집'],
+      class: ['해님반'],
       status: ['failed'],
-      search: ['Kim'],
+      search: ['김'],
     });
     expect(workbookSpy).toHaveBeenCalledWith([sampleRow]);
     expect(response.status).toBe(200);
     expect(response.headers.get('Content-Type')).toBe(
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     );
-    expect(response.headers.get('Content-Disposition')).toBe(
-      'attachment; filename="overdue-statement-2026-04-morning-star-childcare-sun-class.xlsx"'
+    expect(response.headers.get('Content-Disposition')).toContain(
+      'filename="overdue-statement-2026-04.xlsx"'
+    );
+    expect(response.headers.get('Content-Disposition')).toContain(
+      "filename*=UTF-8''%EB%AF%B8%EB%82%A9%EB%AA%85%EC%84%B8%ED%91%9C-2026-04-%EB%B3%84%EA%BD%83-%EC%96%B4%EB%A6%B0%EC%9D%B4%EC%A7%91-%ED%95%B4%EB%8B%98%EB%B0%98.xlsx"
     );
 
     const arrayBuffer = await response.arrayBuffer();
@@ -207,9 +210,9 @@ describe('GET /admin/overdue/export', () => {
 
     await workbook.xlsx.load(arrayBuffer);
 
-    const worksheet = workbook.getWorksheet('Overdue Statement');
+    const worksheet = workbook.getWorksheet('미납 명세표');
 
     expect(worksheet?.getRow(2).getCell(1).value).toBe('MEM-202604-00001');
-    expect(worksheet?.getRow(2).getCell(4).value).toBe('Morning Star Childcare');
+    expect(worksheet?.getRow(2).getCell(4).value).toBe('별꽃 어린이집');
   });
 });

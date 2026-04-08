@@ -21,9 +21,9 @@ type SmokeUser = {
 };
 
 const MORNING_STAR_CENTER_ID = '11111111-1111-1111-1111-111111111111';
-const MORNING_STAR_CENTER_NAME = 'Morning Star Childcare';
-const SUN_CLASS_NAME = 'Sun Class';
-const PARENT_CHILD_NAME = 'Phase 3 Smoke Child';
+const MORNING_STAR_CENTER_NAME = '별꽃 어린이집';
+const SUN_CLASS_NAME = '해님반';
+const PARENT_CHILD_NAME = '3단계 스모크 아동';
 const BATCH_MONTH = '2026-04';
 const BILLING_AMOUNT = 45000;
 
@@ -41,17 +41,17 @@ const supabase = createClient(
 
 const adminProfile = {
   email: env.ADMIN_EMAIL,
-  password: 'Phase3Admin!234',
-  name: 'Phase 3 Smoke Admin',
+  password: 'AdminSmoke!234',
+  name: '3단계 스모크 관리자',
   phone: '01090000000',
 };
 
 const parentProfile = {
   email: 'phase3.parent.smoke@example.com',
   password: 'Phase3Parent!234',
-  name: 'Phase 3 Smoke Parent',
+  name: '3단계 스모크 보호자',
   phone: '01012345678',
-  accountHolder: 'Phase 3 Parent',
+  accountHolder: '3단계 스모크 보호자',
   accountNumber: '110123456789',
 };
 
@@ -372,15 +372,15 @@ async function loginThroughRealForm(page: Page, email: string, password: string)
     page.locator('button[type="submit"]').click(),
   ]);
 
-  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '대시보드' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '로그아웃' })).toBeVisible();
 }
 
 async function verifyMemberRoutes(page: Page) {
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/dashboard$/);
   await expect(page.locator('body')).toContainText(parentProfile.name);
-  await expect(page.getByRole('link', { name: 'Children', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: '자녀 관리', exact: true })).toBeVisible();
 
   await page.goto('/account');
   await expect(page).toHaveURL(/\/account$/);
@@ -388,7 +388,7 @@ async function verifyMemberRoutes(page: Page) {
 
   await page.goto('/consent');
   await expect(page).toHaveURL(/\/consent$/);
-  await expect(page.locator('.w-full.max-w-lg')).toBeVisible();
+  await expect(page.getByTestId('consent-card')).toBeVisible();
 
   await page.goto('/payments');
   await expect(page).toHaveURL(/\/payments$/);
@@ -401,7 +401,7 @@ async function addChildFromChildrenPage(page: Page) {
   await expect(page).toHaveURL(/\/children$/);
   await expect(page.getByTestId('child-form')).toBeVisible();
   await expect(page.getByTestId('child-list')).toContainText(
-    'No children have been added yet.'
+    '등록된 자녀가 아직 없습니다.'
   );
 
   await page.locator('#child-name').fill(PARENT_CHILD_NAME);
@@ -411,7 +411,7 @@ async function addChildFromChildrenPage(page: Page) {
   await page.getByTestId('class-select').click();
   await page.getByText(SUN_CLASS_NAME, { exact: true }).click();
 
-  await page.getByRole('button', { name: 'Add Child' }).click();
+  await page.getByRole('button', { name: '자녀 등록' }).click();
 
   await expect(page.getByTestId('child-list')).toContainText(PARENT_CHILD_NAME);
   await expect(page.getByTestId('child-list')).toContainText(

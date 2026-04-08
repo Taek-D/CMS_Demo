@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { getErrorMessage } from '@/lib/utils';
+import type { BillingStatus } from '@/types/database';
+
+type WebhookPayload = {
+  result_id?: string;
+  status?: BillingStatus;
+  fail_reason?: string | null;
+  processed_at?: string | null;
+};
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createServiceClient();
-    const body = await request.json();
+    const body = (await request.json()) as WebhookPayload;
     const { result_id, status, fail_reason, processed_at } = body;
 
     if (!result_id || !status) {
@@ -38,10 +47,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Webhook error:', error);
+
     return NextResponse.json(
-      { error: error.message || 'Webhook 처리 중 오류가 발생했습니다.' },
+      { error: getErrorMessage(error, 'Failed to process webhook.') },
       { status: 500 }
     );
   }
