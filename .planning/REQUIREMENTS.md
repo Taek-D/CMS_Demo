@@ -41,6 +41,15 @@
 - [x] **P3-03**: Admin screens can view parent, child, childcare center, and class relationships together.
 - [x] **P3-04**: The childcare domain model stays additive and regression-safe alongside the existing member number and billing structures.
 
+## Phase 4 Derived Requirements
+
+### Overdue Management and Statement Export
+
+- [x] **SC-04-01**: Failed billing results appear in a dedicated overdue-management view.
+- [x] **SC-04-02**: Admins can filter overdue rows by batch month, childcare center, and class.
+- [ ] **SC-04-03**: Admins can generate and download a monthly Excel statement grouped by childcare center and class.
+- [ ] **SC-04-04**: Exported data uses the existing billing results plus the new parent/child/class relationships from Phase 3.
+
 ## Out of Scope
 
 | Feature | Reason |
@@ -65,6 +74,10 @@
 | P3-02 | Phase 3 | Complete |
 | P3-03 | Phase 3 | Complete |
 | P3-04 | Phase 3 | Complete |
+| SC-04-01 | Phase 4 | Complete |
+| SC-04-02 | Phase 4 | Complete |
+| SC-04-03 | Phase 4 | Planned |
+| SC-04-04 | Phase 4 | Planned |
 
 ## Latest Verification Notes
 
@@ -75,13 +88,16 @@
 - `P3-02` is complete because `03-02` now ships the searchable center-first flow with class options locked to the selected childcare center.
 - `P3-03` is complete because `03-03` now renders parent, child, childcare center, and class relationships together on `/admin/members` with targeted filter and rendering test coverage.
 - `P3-04` is complete because `03-04` adds stable automation hooks plus a deterministic Playwright regression that proves the additive childcare model coexists with the existing member and billing routes.
+- `SC-04-01` is complete because `04-01` now ships a dedicated `/admin/overdue` route rooted in `cms_billing_results` with failed billing rows and childcare context.
+- `SC-04-02` is complete because `04-01` now supports URL-driven month, childcare center, class, status, and parent-or-child search filters with Vitest coverage.
 
 **Coverage:**
 - v1 requirements: 8 total
 - Phase 3 derived requirements: 4 total
-- Mapped to phases: 12
+- Phase 4 derived requirements: 4 total
+- Mapped to phases: 16
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-08 after completing Phase 03 Plan 04 smoke regression*
+*Last updated: 2026-04-08 after completing Phase 04 Plan 01 overdue page work*

@@ -77,15 +77,15 @@ Phase 3 is now complete. The member child-management UI, admin CRM relationship 
 **Plans:** 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Build the shared overdue query contract and the dedicated `/admin/overdue` CRM page.
+- [x] 04-01-PLAN.md -- Build the shared overdue query contract and the dedicated `/admin/overdue` CRM page.
 - [ ] 04-02-PLAN.md -- Add `exceljs`-backed XLSX export on `/admin/overdue/export` with shared filter semantics.
 - [ ] 04-03-PLAN.md -- Wire overdue tooling into the admin journey and verify the full results-to-export path with Playwright.
 
 ## Next Step
 
-`Plan and execute Phase 4 overdue-member management and statement export work`
+`Execute Phase 4 Plan 02 for the XLSX export route on /admin/overdue/export`
 
 Phase 3 is complete. Phase 4 can now build overdue-management and Excel export features on top of the verified member, billing, parent, child, center, and class flows.
 
 ---
-*Last updated: 2026-04-08 after completing Phase 03 Plan 04*
+*Last updated: 2026-04-08 after completing Phase 04 Plan 01 overdue page work*
