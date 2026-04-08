@@ -1,11 +1,17 @@
+import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockCreateServiceClient } = vi.hoisted(() => ({
+const { mockCreateServiceClient, mockRequireAdmin } = vi.hoisted(() => ({
   mockCreateServiceClient: vi.fn(),
+  mockRequireAdmin: vi.fn(),
 }));
 
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: mockCreateServiceClient,
+}));
+
+vi.mock('@/lib/admin-auth', () => ({
+  requireAdmin: mockRequireAdmin,
 }));
 
 import {
@@ -15,6 +21,7 @@ import {
   normalizeOverdueFilters,
   toOverdueRow,
 } from './data';
+import OverduePage from './page';
 
 type QueryMock = {
   eq: ReturnType<typeof vi.fn>;
@@ -55,6 +62,7 @@ function createPageQuery(rows: unknown[]) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockRequireAdmin.mockResolvedValue({ id: 'admin-member' });
 });
 
 describe('normalizeOverdueFilters', () => {
@@ -294,5 +302,131 @@ describe('fetchOverdueRows', () => {
     expect(rows).toHaveLength(1);
     expect(rows[0]?.memberNo).toBe('MEM-002');
     expect(rows[0]?.childNames).toBe('Jiyoon');
+  });
+});
+
+describe('OverduePage', () => {
+  it('shows the overdue filters with a failed default and keeps export gated until the scope is complete', async () => {
+    const query = createPageQuery([]);
+
+    mockCreateServiceClient.mockResolvedValue({
+      from: vi.fn(() => query),
+    });
+
+    const view = await OverduePage({
+      searchParams: Promise.resolve({}),
+    });
+
+    render(view);
+
+    expect(screen.getByTestId('admin-overdue-month-filter')).toBeTruthy();
+    expect(screen.getByTestId('admin-overdue-center-filter')).toBeTruthy();
+    expect(screen.getByTestId('admin-overdue-class-filter')).toBeTruthy();
+    expect((screen.getByTestId('admin-overdue-status-filter') as HTMLSelectElement).value).toBe(
+      'failed'
+    );
+    expect(screen.getByTestId('admin-overdue-search-filter')).toBeTruthy();
+    expect(screen.getByTestId('admin-overdue-submit')).toBeTruthy();
+    expect(screen.getByTestId('admin-overdue-export-hint').textContent).toContain(
+      'Select month, childcare center, and class to enable statement export.'
+    );
+    expect(screen.queryByTestId('admin-overdue-export-link')).toBeNull();
+  });
+
+  it('renders the overdue table columns and passes the current query string to the export route when scoped', async () => {
+    const query = createPageQuery([
+      {
+        id: 'result-1',
+        batch_id: 'batch-1',
+        member_id: 'member-1',
+        account_id: 'account-1',
+        amount: 55000,
+        status: 'failed',
+        fail_reason: 'Insufficient funds',
+        processed_at: '2026-04-08T00:00:00.000Z',
+        created_at: '2026-04-08T00:00:00.000Z',
+        batch: {
+          id: 'batch-1',
+          batch_month: '2026-04',
+        },
+        member: {
+          id: 'member-1',
+          member_no: 'MEM-001',
+          name: 'Kim Parent',
+          email: 'kim@example.com',
+          children: [
+            {
+              id: 'child-1',
+              name: 'Minji',
+              class: {
+                id: 'class-1',
+                name: 'Sun Class',
+                center: {
+                  id: 'center-1',
+                  name: 'Morning Star Childcare',
+                },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    mockCreateServiceClient.mockResolvedValue({
+      from: vi.fn(() => query),
+    });
+
+    const view = await OverduePage({
+      searchParams: Promise.resolve({
+        month: '2026-04',
+        center: 'Morning Star Childcare',
+        class: 'Sun Class',
+        status: 'failed',
+        search: 'Minji',
+      }),
+    });
+
+    render(view);
+
+    expect(screen.getByTestId('admin-overdue-table')).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Member No.' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Parent' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Children' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Childcare Center' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Class' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Batch Month' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Amount' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Billing Status' })).toBeTruthy();
+    expect(screen.getByRole('columnheader', { name: 'Fail Reason' })).toBeTruthy();
+    expect(screen.getByText('MEM-001')).toBeTruthy();
+    expect(screen.getByText('Kim Parent')).toBeTruthy();
+    expect(screen.getByText('Minji')).toBeTruthy();
+    expect(screen.getByText('Morning Star Childcare')).toBeTruthy();
+    expect(screen.getByText('Sun Class')).toBeTruthy();
+    expect(screen.getByText('55,000')).toBeTruthy();
+    expect(screen.getAllByText('Failed')).toHaveLength(2);
+    expect(screen.getByText('Insufficient funds')).toBeTruthy();
+    expect(screen.getByTestId('admin-overdue-export-link').getAttribute('href')).toBe(
+      '/admin/overdue/export?month=2026-04&center=Morning+Star+Childcare&class=Sun+Class&status=failed&search=Minji'
+    );
+    expect(screen.queryByTestId('admin-overdue-export-hint')).toBeNull();
+  });
+
+  it('keeps the empty-state copy when no overdue rows match the filters', async () => {
+    const query = createPageQuery([]);
+
+    mockCreateServiceClient.mockResolvedValue({
+      from: vi.fn(() => query),
+    });
+
+    const view = await OverduePage({
+      searchParams: Promise.resolve({
+        month: '2026-04',
+      }),
+    });
+
+    render(view);
+
+    expect(screen.getByText('No overdue rows match the current filters.')).toBeTruthy();
   });
 });
