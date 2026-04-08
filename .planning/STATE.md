@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-08T08:57:40.586Z"
+last_updated: "2026-04-08T09:12:04.752Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 ## Project Reference
@@ -22,7 +22,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-08)
 ## Current Position
 
 Phase: 04 (overdue-statement-excel) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-04-08
 
@@ -69,7 +69,7 @@ Last activity: 2026-04-08
 
 ## Next Action
 
-- Execute Phase 04 Plan 02 to add the `/admin/overdue/export` XLSX route on top of the now-shared overdue filter contract.
+- Execute Phase 04 Plan 03 to wire the overdue tooling into the admin journey and verify the results-to-export path with Playwright.
 
 ## Decisions
 
@@ -87,6 +87,9 @@ Last activity: 2026-04-08
 - [Phase 03-parent-childcare-domain]: Normalized admin CRM relation payloads at render time because live Supabase joins can return either a single object or an array.
 - [Phase 04-overdue-statement-excel]: Kept overdue rows rooted in cms_billing_results and aggregated child, center, and class labels onto each member-level billing result.
 - [Phase 04-overdue-statement-excel]: Gated the statement export link behind explicit month, center, and class filters while passing the raw query string through to the nested export route.
+- [Phase 04-overdue-statement-excel]: Used ExcelJS only on the server export route so XLSX generation stays behind admin auth and reflects live overdue data.
+- [Phase 04-overdue-statement-excel]: Rejected export requests before any data fetch when month, center, or class is missing to enforce the explicit statement scope contract.
+- [Phase 04-overdue-statement-excel]: Reused normalizeOverdueFilters and fetchOverdueRows in the export route so the workbook matches the overdue page row semantics.
 
 ## Performance Metrics
 
@@ -97,8 +100,9 @@ Last activity: 2026-04-08
 | 03-parent-childcare-domain | 03 | 8 min | 2 | 2 | 2026-04-08 |
 | 03-parent-childcare-domain | 04 | 19 min | 2 | 6 | 2026-04-08 |
 | 04-overdue-statement-excel | 01 | 4 min | 2 | 3 | 2026-04-08 |
+| Phase 04-overdue-statement-excel P02 | 15 min | 2 tasks | 5 files |
 
 ## Session Info
 
-- Last session: 2026-04-08T17:56:14+09:00
-- Stopped At: Completed 04-01-PLAN.md
+- Last session: 2026-04-08T18:12:04+09:00
+- Stopped At: Completed 04-02-PLAN.md

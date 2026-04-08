@@ -47,8 +47,8 @@
 
 - [x] **SC-04-01**: Failed billing results appear in a dedicated overdue-management view.
 - [x] **SC-04-02**: Admins can filter overdue rows by batch month, childcare center, and class.
-- [ ] **SC-04-03**: Admins can generate and download a monthly Excel statement grouped by childcare center and class.
-- [ ] **SC-04-04**: Exported data uses the existing billing results plus the new parent/child/class relationships from Phase 3.
+- [x] **SC-04-03**: Admins can generate and download a monthly Excel statement grouped by childcare center and class.
+- [x] **SC-04-04**: Exported data uses the existing billing results plus the new parent/child/class relationships from Phase 3.
 
 ## Out of Scope
 
@@ -76,8 +76,8 @@
 | P3-04 | Phase 3 | Complete |
 | SC-04-01 | Phase 4 | Complete |
 | SC-04-02 | Phase 4 | Complete |
-| SC-04-03 | Phase 4 | Planned |
-| SC-04-04 | Phase 4 | Planned |
+| SC-04-03 | Phase 4 | Complete |
+| SC-04-04 | Phase 4 | Complete |
 
 ## Latest Verification Notes
 
@@ -90,6 +90,8 @@
 - `P3-04` is complete because `03-04` adds stable automation hooks plus a deterministic Playwright regression that proves the additive childcare model coexists with the existing member and billing routes.
 - `SC-04-01` is complete because `04-01` now ships a dedicated `/admin/overdue` route rooted in `cms_billing_results` with failed billing rows and childcare context.
 - `SC-04-02` is complete because `04-01` now supports URL-driven month, childcare center, class, status, and parent-or-child search filters with Vitest coverage.
+- `SC-04-03` is complete because `04-02` now ships an admin-only `exceljs` export route at `/admin/overdue/export` with XLSX attachment coverage and the explicit month/center/class scope contract.
+- `SC-04-04` is complete because `04-02` reuses the shared overdue filters and aggregated member-level row semantics from `04-01` inside the workbook route and its route-level tests.
 
 **Coverage:**
 - v1 requirements: 8 total
@@ -100,4 +102,4 @@
 
 ---
 *Requirements defined: 2026-04-06*
-*Last updated: 2026-04-08 after completing Phase 04 Plan 01 overdue page work*
+*Last updated: 2026-04-08 after completing Phase 04 Plan 02 overdue export work*
