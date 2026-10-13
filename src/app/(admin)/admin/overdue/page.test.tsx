@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 const { mockCreateServiceClient, mockRequireAdmin } = vi.hoisted(() => ({
   mockCreateServiceClient: vi.fn(),
@@ -24,8 +24,8 @@ import {
 import OverduePage from './page';
 
 type QueryMock = {
-  eq: ReturnType<typeof vi.fn>;
-  ilike: ReturnType<typeof vi.fn>;
+  eq: Mock<(column: string, value: string) => QueryMock>;
+  ilike: Mock<(column: string, pattern: string) => QueryMock>;
 };
 
 function createQueryMock(): QueryMock {

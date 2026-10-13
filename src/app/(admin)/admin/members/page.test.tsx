@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 const { mockRequireAdmin, mockCreateServiceClient, mockDecryptAccount, mockMaskAccount } = vi.hoisted(
   () => ({
@@ -27,12 +27,12 @@ import {
   default as MembersPage,
   applyMemberFilters,
   buildMembersSelect,
-  type MembersSearchParams,
+  type MemberFilters,
 } from './page';
 
 type QueryMock = {
-  or: ReturnType<typeof vi.fn>;
-  ilike: ReturnType<typeof vi.fn>;
+  or: Mock<(filters: string) => QueryMock>;
+  ilike: Mock<(column: string, pattern: string) => QueryMock>;
 };
 
 function createQueryMock(): QueryMock {
@@ -110,7 +110,7 @@ describe('applyMemberFilters', () => {
 
   it('keeps parent-name filtering alongside relation filters', () => {
     const query = createQueryMock();
-    const filters: MembersSearchParams = {
+    const filters: Partial<MemberFilters> = {
       parent: '김',
       child: '민지',
     };
