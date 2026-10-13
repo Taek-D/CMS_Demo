@@ -44,3 +44,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# 로컬 전용 작업 문서·도구 설정
+/.planning/
+/CLAUDE.md
+/AGENTS.md
