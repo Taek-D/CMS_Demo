@@ -39,7 +39,7 @@
 
 ## 기술 스택
 
-- Frontend: Next.js 15, React 19, TypeScript
+- Frontend: Next.js 16, React 19, TypeScript
 - Styling: Tailwind CSS, shadcn/ui
 - Backend: Next.js Server Actions, Route Handlers
 - Database: Supabase PostgreSQL
